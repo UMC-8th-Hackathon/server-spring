@@ -1,0 +1,88 @@
+HELP.md
+target/
+!.mvn/wrapper/maven-wrapper.jar
+!**/src/main/**/target/
+!**/src/test/**/target/
+
+### Gradle ###
+.gradle/
+build/
+
+### STS ###
+.apt_generated
+.classpath
+.factorypath
+.project
+.settings
+.springBeans
+.sts4-cache
+
+### IntelliJ IDEA ###
+.idea
+*.iws
+*.iml
+*.ipr
+
+### NetBeans ###
+/nbproject/private/
+/nbbuild/
+/dist/
+/nbdist/
+/.nb-gradle/
+build/
+!**/src/main/**/build/
+!**/src/test/**/build/
+
+### VS Code ###
+.vscode/
+
+### Mac OS ###
+.DS_Store
+
+### Windows ###
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+
+### Logs ###
+*.log
+logs/
+
+### Runtime data ###
+pids
+*.pid
+*.seed
+*.pid.lock
+
+### Coverage directory used by tools like istanbul ###
+coverage/
+
+### nyc test coverage ###
+.nyc_output
+
+### Dependency directories ###
+node_modules/
+
+### Optional npm cache directory ###
+.npm
+
+### Optional REPL history ###
+.node_repl_history
+
+### Output of 'npm pack' ###
+*.tgz
+
+### Yarn Integrity file ###
+.yarn-integrity
+
+### dotenv environment variables file ###
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+### Application specific ###
+application-dev.yml
+application-prod.yml
+application-local.yml 
