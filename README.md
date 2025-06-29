@@ -9,7 +9,7 @@
 - **Java 버전**: 21
 - **빌드 도구**: Gradle
 - **데이터베이스**: H2 (개발용 인메모리)
-- 
+
 ## 👶🏼 Spring Members 👶🏼
 <img width="160px" src="https://avatars.githubusercontent.com/u/106726806?v=4"/> | <img width="160px" src="https://avatars.githubusercontent.com/u/105594739?v=4"/> | <img width="160px" src="https://avatars.githubusercontent.com/u/105594739?v=4"/> | <img width="160px" src="https://avatars.githubusercontent.com/u/105594739?v=4"/> | 
 |:-----:|:-----:|:-----:|:-----:|
