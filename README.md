@@ -348,3 +348,4 @@ public class SwaggerConfig {
 
 이 프로젝트는 MIT 라이센스 하에 배포됩니다.
 Discord 알림 테스트
+GitHub Discord 연동 테스트 - 2025년 6월 30일 월요일 02시 18분 46초 KST
