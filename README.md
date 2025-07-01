@@ -12,10 +12,10 @@
 
 ## 👶🏼 Spring Members 👶🏼
 
-| <img width="160px" src="https://avatars.githubusercontent.com/u/106726806?v=4"/> | <img width="160px" src="https://avatars.githubusercontent.com/u/105594739?v=4"/> | <img width="160px" src="https://avatars.githubusercontent.com/u/105594739?v=4"/> | <img width="160px" src="https://avatars.githubusercontent.com/u/105594739?v=4"/> |
-| :------------------------------------------------------------------------------: | :------------------------------------------------------------------------------: | :------------------------------------------------------------------------------: | :------------------------------------------------------------------------------: |
-|                   [송재곤 (아진)](https://github.com/worhs02)                    |              [강영민 (바게트빵)](https://github.com/Baguette-bbang)              |                   [박채연 (므느)](https://github.com/qkrcodus)                   |                   [정세린 (후디)](https://github.com/sereene)                    |
-|                                     팀장 👑                                      |                                     팀원 👨🏻‍💻                                      |                                     팀원 👨🏻‍💻                                      |                                     팀원 👨🏻‍💻                                      |
+| <img width="160px" src="https://github.com/worhs02.png"/> | <img width="160px" src="https://github.com/Baguette-bbang.png"/> | <img width="160px" src="https://github.com/qkrcodus.png"/> | <img width="160px" src="https://github.com/sereene.png"/> |
+| :-------------------------------------------------------: | :--------------------------------------------------------------: | :--------------------------------------------------------: | :-------------------------------------------------------: |
+|        [송재곤 (아진)](https://github.com/worhs02)        |      [강영민 (바게트빵)](https://github.com/Baguette-bbang)      |        [박채연 (므느)](https://github.com/qkrcodus)        |        [정세린 (후디)](https://github.com/sereene)        |
+|                          팀장 👑                          |                             팀원 👨🏻‍💻                              |                          팀원 👨🏻‍💻                           |                          팀원 👨🏻‍💻                          |
 
 </div>
 <br/>
@@ -361,3 +361,5 @@ public class SwaggerConfig {
 ## 라이센스
 
 이 프로젝트는 MIT 라이센스 하에 배포됩니다.
+Discord 알림 테스트
+GitHub Discord 연동 테스트
