@@ -2,7 +2,7 @@ name: Divary CI/CD
 
 on:
   push:
-    branches: [ develop, main ]  # develop 또는 main에 push되면 실행
+    branches: [ develop, main ]  # develop, main 브랜치 푸시 시 동작
 
 jobs:
   build:
@@ -18,13 +18,13 @@ jobs:
           distribution: 'temurin'
           java-version: '17'
 
-      - name: Make application.yml
+      - name: Generate application.yml
         run: |
           mkdir -p ./src/main/resources
           echo "${{ secrets.APPLICATION_YML }}" > ./src/main/resources/application.yml
         shell: bash
 
-      - name: Grant execute permission for gradlew
+      - name: Grant permission to gradlew
         run: chmod +x gradlew
 
       - name: Build with Gradle
@@ -33,19 +33,19 @@ jobs:
           arguments: build
 
       - name: Upload build artifact
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4  
         with:
           name: divary-artifact
           path: build/libs/*.jar
 
   deploy:
     needs: build
-    if: github.ref == 'refs/heads/main'  # main 브랜치일 때만 실행
+    if: github.ref == 'refs/heads/main'  # ✅ main 브랜치에서만 배포 실행
     runs-on: ubuntu-latest
 
     steps:
       - name: Download build artifact
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v4
         with:
           name: divary-artifact
           path: build/libs/
@@ -61,12 +61,12 @@ jobs:
 
           jar_file=$(find build/libs -name '*.jar' ! -name '*plain.jar' | head -n 1)
 
-          scp -i private_key.pem -o StrictHostKeyChecking=no "$jar_file" $EC2_USERNAME@$EC2_HOST:/home/$EC2_USERNAME/app.jar
+          scp -i private_key.pem -o StrictHostKeyChecking=no "$jar_file" $EC2_USERNAME@$EC2_HOST:/home/$EC2_USERNAME/divary-app.jar
 
           ssh -i private_key.pem -o StrictHostKeyChecking=no $EC2_USERNAME@$EC2_HOST << EOF
             pgrep java | xargs -r kill -15
             sleep 5
-            nohup java -jar /home/$EC2_USERNAME/app.jar > app.log 2>&1 &
+            nohup java -jar /home/$EC2_USERNAME/divary-app.jar > app.log 2>&1 &
           EOF
 
           rm -f private_key.pem
