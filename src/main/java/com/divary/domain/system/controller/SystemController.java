@@ -19,7 +19,6 @@ public class SystemController {
     @Operation(summary = "헬스 체크", description = "서비스 상태를 확인합니다.")
     @ApiErrorExamples({
         ErrorCode.INTERNAL_SERVER_ERROR,
-        ErrorCode.DATABASE_ERROR
     })
     @GetMapping("/health")
     public ApiResponse<Map<String, Object>> health() {
@@ -46,7 +45,6 @@ public class SystemController {
     @ApiErrorExamples({
         ErrorCode.VALIDATION_ERROR,
         ErrorCode.REQUIRED_FIELD_MISSING,
-        ErrorCode.INVALID_FORMAT,
         ErrorCode.INVALID_INPUT_VALUE
     })
     @GetMapping("/validation-test")
