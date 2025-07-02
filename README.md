@@ -9,14 +9,13 @@
 - **Java 버전**: 21
 - **빌드 도구**: Gradle
 - **데이터베이스**: H2 (개발용 인메모리)
--
 
 ## 👶🏼 Spring Members 👶🏼
 
-| <img width="160px" src="https://avatars.githubusercontent.com/u/106726806?v=4"/> | <img width="160px" src="https://avatars.githubusercontent.com/u/105594739?v=4"/> | <img width="160px" src="https://avatars.githubusercontent.com/u/105594739?v=4"/> | <img width="160px" src="https://avatars.githubusercontent.com/u/105594739?v=4"/> |
-| :------------------------------------------------------------------------------: | :------------------------------------------------------------------------------: | :------------------------------------------------------------------------------: | :------------------------------------------------------------------------------: |
-|                   [송재곤 (아진)](https://github.com/worhs02)                    |              [강영민 (바게트빵)](https://github.com/Baguette-bbang)              |                   [박채연 (므느)](https://github.com/qkrcodus)                   |                   [정세린 (후디)](https://github.com/sereene)                    |
-|                                     팀장 👑                                      |                                     팀원 👨🏻‍💻                                      |                                     팀원 👨🏻‍💻                                      |                                     팀원 👨🏻‍💻                                      |
+| <img width="160px" src="https://github.com/worhs02.png"/> | <img width="160px" src="https://github.com/Baguette-bbang.png"/> | <img width="160px" src="https://github.com/qkrcodus.png"/> | <img width="160px" src="https://github.com/sereene.png"/> |
+| :-------------------------------------------------------: | :--------------------------------------------------------------: | :--------------------------------------------------------: | :-------------------------------------------------------: |
+|        [송재곤 (아진)](https://github.com/worhs02)        |      [강영민 (바게트빵)](https://github.com/Baguette-bbang)      |        [박채연 (므느)](https://github.com/qkrcodus)        |        [정세린 (후디)](https://github.com/sereene)        |
+|                          팀장 👑                          |                             팀원 👨🏻‍💻                              |                          팀원 👨🏻‍💻                           |                          팀원 👨🏻‍💻                          |
 
 </div>
 <br/>
@@ -183,12 +182,17 @@ divary-spring/
 │   │   │           └── global/                         # 전역 설정 모듈
 │   │   │               ├── config/                     # 전역 설정
 │   │   │               │   └── SwaggerConfig.java      # Swagger API 문서 설정
-│   │   │               └── exception/                  # 전역 예외 처리
-│   │   │                   ├── BusinessException.java  # 비즈니스 예외 클래스
-│   │   │                   ├── ErrorCode.java          # 에러 코드 enum
-│   │   │                   └── GlobalExceptionHandler.java # 전역 예외 핸들러
+│   │   │               ├── exception/                  # 전역 예외 처리
+│   │   │               │   ├── BusinessException.java  # 비즈니스 예외 클래스
+│   │   │               │   ├── ErrorCode.java          # 에러 코드 enum
+│   │   │               │   └── GlobalExceptionHandler.java # 전역 예외 핸들러
+│   │   │               └── intercepter/                # 인터셉터
+│   │   │                   └── LoggingInterceptor.java # HTTP 요청 로깅 인터셉터
 │   │   └── resources/
-│   │       ├── application.yml                         # 애플리케이션 설정 (추후 환경에 따라 구분)
+│   │       ├── application.yml             # 기본 애플리케이션 설정
+│   │       ├── application-dev.yml         # 개발 환경 설정
+│   │       ├── application-prod.yml        # 운영 환경 설정
+│   │       └── logback-spring.xml          # 로깅 설정
 ```
 
 ## 주요 의존성
@@ -230,6 +234,7 @@ divary-spring/
 
 - **config**: 애플리케이션 전역 설정
 - **exception**: 전역 예외 처리 및 에러 코드 정의
+- **intercepter**: HTTP 요청/응답 인터셉터 (로깅 등)
 
 ## API 문서화 (Swagger)
 
@@ -344,6 +349,52 @@ public class SwaggerConfig {
 2. JPA 어노테이션 사용
 3. Lombok 어노테이션으로 보일러플레이트 코드 제거
 
+## 로깅 시스템
+
+### 로깅 설정
+
+**Logback**을 사용하여 로깅 시스템을 구축했습니다.
+
+#### 로그 출력 대상
+
+- **콘솔**: 개발 시 실시간 로그 확인 (색상 지원)
+- **파일**: `logs/divary.log`에 로그 저장 (일별, 크기별 롤링)
+
+#### 로그 패턴
+
+```
+[시간] [스레드] [로그레벨] [traceId] [로거명] - 메시지
+```
+
+#### Trace ID 시스템
+
+- 모든 HTTP 요청에 고유한 8자리 traceId 자동 생성
+- 같은 요청에서 발생하는 모든 로그를 추적 가능
+- `LoggingInterceptor`를 통해 자동 처리
+
+### 환경별 로깅 설정
+
+#### 개발 환경 (dev)
+
+- **루트 레벨**: WARN
+- **애플리케이션 로그**: DEBUG (com.divary 패키지)
+- **SQL 로그**: DEBUG (쿼리 및 파라미터)
+- **Spring 프레임워크 로그**: INFO
+
+#### 운영 환경 (prod)
+
+- **루트 레벨**: INFO
+- **애플리케이션 로그**: INFO
+- **SQL 로그**: 비활성화
+- **파일 출력만**: 콘솔 출력 비활성화
+
+### 로그 파일 관리
+
+- **최대 파일 크기**: 100MB
+- **보관 기간**: 30일
+- **총 용량 제한**: 3GB
+- **파일명 패턴**: `divary.yyyy-MM-dd.i.log`
+
 ## 환경 설정
 
 ### 개발 환경
@@ -352,6 +403,7 @@ public class SwaggerConfig {
 - Spring Boot 3.5.3
 - H2 인메모리 데이터베이스
 - Swagger UI 활성화
+- 로깅 활성화
 
 ### 프로덕션 환경
 
@@ -362,4 +414,5 @@ public class SwaggerConfig {
 ## 라이센스
 
 이 프로젝트는 MIT 라이센스 하에 배포됩니다.
-Discord 알림 테스트..
+Discord 알림 테스트
+GitHub Discord 연동 테스트
