@@ -33,11 +33,19 @@ jobs:
       - name: Build with Gradle
         run: ./gradlew build
 
+      - name: Zip the JAR file #jar 파일 압축
+        run: |
+          mkdir -p package
+          cp build/libs/*.jar package/
+          cd package
+          zip divary-app.zip *.jar
+        shell: bash
+
       - name: Upload build artifact
         uses: actions/upload-artifact@v4
         with:
           name: divary-artifact
-          path: build/libs/*.jar
+          path: package/divary-app.zip #압축된 파일만 업로드
 
   deploy:
     needs: build
@@ -49,7 +57,7 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           name: divary-artifact
-          path: build/libs/
+          path: ./deploy-package
 
       - name: Deploy to EC2
         env:
@@ -60,14 +68,21 @@ jobs:
           echo "$EC2_SSH_KEY" > private_key.pem
           chmod 600 private_key.pem
 
-          jar_file=$(find build/libs -name '*.jar' ! -name '*plain.jar' | head -n 1)
+          # 압축 파일 경로 설정
+          zip_file=deploy-package/divary-app.zip
 
-          scp -i private_key.pem -o StrictHostKeyChecking=no "$jar_file" $EC2_USERNAME@$EC2_HOST:/home/$EC2_USERNAME/divary-app.jar
+          # 압축 파일을 EC2로 전송
+          scp -i private_key.pem -o StrictHostKeyChecking=no "$zip_file" $EC2_USERNAME@$EC2_HOST:/home/$EC2_USERNAME/divary-app.zip
 
+          # EC2 접속 후 압축 해제 및 실행
           ssh -i private_key.pem -o StrictHostKeyChecking=no $EC2_USERNAME@$EC2_HOST << EOF
             pgrep java | xargs -r kill -15
             sleep 5
-            nohup java -jar /home/$EC2_USERNAME/divary-app.jar > app.log 2>&1 &
+
+            unzip -o divary-app.zip -d divary-app
+            jar_file=\$(find divary-app -name '*.jar' ! -name '*plain.jar' | head -n 1)
+
+            nohup java -jar "\$jar_file" > app.log 2>&1 &
           EOF
 
           rm -f private_key.pem
