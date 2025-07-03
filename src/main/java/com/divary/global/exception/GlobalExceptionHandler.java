@@ -11,10 +11,6 @@ import org.springframework.web.bind.MissingServletRequestParameterException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
-import org.springframework.web.servlet.NoHandlerFoundException;
-
-import jakarta.validation.ConstraintViolationException;
-import java.nio.file.AccessDeniedException;
 
 @Slf4j
 @RestControllerAdvice
@@ -46,8 +42,8 @@ public class GlobalExceptionHandler {
      * 필수 파라미터 누락 예외 처리
      */
     @ExceptionHandler(MissingServletRequestParameterException.class)
-    protected ResponseEntity<ApiResponse<Void>> handleMissingServletRequestParameterException(MissingServletRequestParameterException e) {
-        log.error("MissingServletRequestParameterException: {}", e.getMessage());
+    protected ResponseEntity<ApiResponse<Void>> handleMissingParameterException(MissingServletRequestParameterException e) {
+        log.error("Missing Parameter: {}", e.getParameterName());
         return ResponseEntity
                 .status(HttpStatus.BAD_REQUEST)
                 .body(ApiResponse.error(ErrorCode.REQUIRED_FIELD_MISSING));
@@ -57,8 +53,8 @@ public class GlobalExceptionHandler {
      * 파라미터 타입 불일치 예외 처리
      */
     @ExceptionHandler(MethodArgumentTypeMismatchException.class)
-    protected ResponseEntity<ApiResponse<Void>> handleMethodArgumentTypeMismatchException(MethodArgumentTypeMismatchException e) {
-        log.error("MethodArgumentTypeMismatchException: {}", e.getMessage());
+    protected ResponseEntity<ApiResponse<Void>> handleTypeMismatchException(MethodArgumentTypeMismatchException e) {
+        log.error("Type Mismatch: {} for parameter {}", e.getValue(), e.getName());
         return ResponseEntity
                 .status(HttpStatus.BAD_REQUEST)
                 .body(ApiResponse.error(ErrorCode.INVALID_INPUT_VALUE));
@@ -68,44 +64,11 @@ public class GlobalExceptionHandler {
      * 지원하지 않는 HTTP 메서드 예외 처리
      */
     @ExceptionHandler(HttpRequestMethodNotSupportedException.class)
-    protected ResponseEntity<ApiResponse<Void>> handleHttpRequestMethodNotSupportedException(HttpRequestMethodNotSupportedException e) {
-        log.error("HttpRequestMethodNotSupportedException: {}", e.getMessage());
+    protected ResponseEntity<ApiResponse<Void>> handleMethodNotSupportedException(HttpRequestMethodNotSupportedException e) {
+        log.error("Method Not Supported: {}", e.getMethod());
         return ResponseEntity
                 .status(HttpStatus.METHOD_NOT_ALLOWED)
                 .body(ApiResponse.error(ErrorCode.METHOD_NOT_ALLOWED));
-    }
-
-    /**
-     * 요청한 리소스를 찾을 수 없는 예외 처리
-     */
-    @ExceptionHandler(NoHandlerFoundException.class)
-    protected ResponseEntity<ApiResponse<Void>> handleNoHandlerFoundException(NoHandlerFoundException e) {
-        log.error("NoHandlerFoundException: {}", e.getMessage());
-        return ResponseEntity
-                .status(HttpStatus.NOT_FOUND)
-                .body(ApiResponse.error(ErrorCode.RESOURCE_NOT_FOUND));
-    }
-
-    /**
-     * 접근 거부 예외 처리
-     */
-    @ExceptionHandler(AccessDeniedException.class)
-    protected ResponseEntity<ApiResponse<Void>> handleAccessDeniedException(AccessDeniedException e) {
-        log.error("AccessDeniedException: {}", e.getMessage());
-        return ResponseEntity
-                .status(HttpStatus.FORBIDDEN)
-                .body(ApiResponse.error(ErrorCode.ACCESS_DENIED));
-    }
-
-    /**
-     * 데이터베이스 제약 조건 위반 예외 처리
-     */
-    @ExceptionHandler(ConstraintViolationException.class)
-    protected ResponseEntity<ApiResponse<Void>> handleConstraintViolationException(ConstraintViolationException e) {
-        log.error("ConstraintViolationException: {}", e.getMessage());
-        return ResponseEntity
-                .status(HttpStatus.BAD_REQUEST)
-                .body(ApiResponse.error(ErrorCode.CONSTRAINT_VIOLATION));
     }
 
     /**
