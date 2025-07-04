@@ -84,7 +84,8 @@ jobs:
              # systemd 재시작
             sudo systemctl daemon-reload
             sudo systemctl restart divary
-            sudo systemctl status divary --no-pager
+            sudo systemctl is-active divary
+
           EOF
 
           rm -f private_key.pem
