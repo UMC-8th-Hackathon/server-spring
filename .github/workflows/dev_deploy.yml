@@ -75,7 +75,7 @@ jobs:
           # EC2에서 압축 해제 후 실행
           ssh -i private_key.pem -o StrictHostKeyChecking=no $EC2_USERNAME@$EC2_HOST << EOF
             set -e
-            cd /home/$USER
+            cd /home/ubuntu
 
             rm -rf divary-app
             mkdir -p divary-app
