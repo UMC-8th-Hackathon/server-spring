@@ -74,16 +74,17 @@ jobs:
 
           # EC2에서 압축 해제 후 실행
           ssh -i private_key.pem -o StrictHostKeyChecking=no $EC2_USERNAME@$EC2_HOST << EOF
-            pgrep java | xargs -r kill -15
-            sleep 5
+            set -e
+            cd /home/ubuntu
 
             rm -rf divary-app
             mkdir -p divary-app
             tar -xzf divary-app.tar.gz -C divary-app
 
-            jar_file=\$(find divary-app -name '*.jar' ! -name '*plain.jar' | head -n 1)
-
-            nohup java -jar "\$jar_file" > app.log 2>&1 &
+             # systemd 재시작
+            sudo systemctl daemon-reload
+            sudo systemctl restart divary
+            sudo systemctl is-active divary
           EOF
 
           rm -f private_key.pem
