@@ -33,7 +33,7 @@ jobs:
       - name: Build with Gradle
         run: ./gradlew build
 
-      - name: Compress JAR with tar.gz # jar 파일 압축
+      - name: Compress JAR with tar.gz
         run: |
           mkdir -p package
           cp build/libs/*.jar package/
@@ -44,7 +44,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: umc-hackathon-artifact
-          path: umc-hackathon-app.tar.gz # 압축된 tar.gz 파일만 업로드
+          path: umc-hackathon-app.tar.gz
 
   deploy:
     needs: build
@@ -63,29 +63,80 @@ jobs:
           EC2_SSH_KEY: ${{ secrets.EC2_SSH_KEY }}
           EC2_USERNAME: ${{ secrets.EC2_USERNAME }}
           EC2_HOST: ${{ secrets.EC2_HOST }}
-          SPRING_PROFILES_ACTIVE: prod
         run: |
           echo "$EC2_SSH_KEY" > private_key.pem
           chmod 600 private_key.pem
 
-                    tar_file=deploy-package/umc-hackathon-app.tar.gz
+          tar_file=deploy-package/umc-hackathon-app.tar.gz
 
-          # tar.gz 파일을 EC2로 전송
+          # JAR 파일을 EC2로 전송
           scp -i private_key.pem -o StrictHostKeyChecking=no "$tar_file" $EC2_USERNAME@$EC2_HOST:/home/$EC2_USERNAME/umc-hackathon-app.tar.gz
 
-          # EC2에서 압축 해제 후 실행
-          ssh -i private_key.pem -o StrictHostKeyChecking=no $EC2_USERNAME@$EC2_HOST << EOF
-            set -e
-            cd /home/ec2-user
+          # EC2에서 기존 프로세스 종료 후 새 애플리케이션 실행
+          ssh -i private_key.pem -o StrictHostKeyChecking=no $EC2_USERNAME@$EC2_HOST << 'EOF'
+            # 기존 Java 프로세스 종료
+            echo "=== Stopping existing application ==="
+            pkill -f "umc-hackathon" || echo "No existing process found"
+            sleep 5
 
+            # 애플리케이션 디렉토리 준비
+            cd /home/ec2-user
             rm -rf umc-hackathon-app
-            mkdir -p umc-hackathon-app
+            mkdir -p umc-hackathon-app logs
             tar -xzf umc-hackathon-app.tar.gz -C umc-hackathon-app
 
-            # systemd 재시작
-            sudo systemctl daemon-reload
-            sudo systemctl restart umc-hackathon
-            sudo systemctl is-active umc-hackathon
+            # Java 버전 및 JAR 파일 확인
+            echo "=== Environment Check ==="
+            java -version
+            echo "JAR files:"
+            ls -la umc-hackathon-app/
+
+            # Spring Boot 애플리케이션 시작 (logback이 logs/umc-hackathon.log에 로깅)
+            echo "=== Starting Spring Boot Application ==="
+            cd umc-hackathon-app
+            nohup java -Dspring.profiles.active=prod \
+                       -Xms512m -Xmx1024m \
+                       -jar *.jar > /dev/null 2>&1 &
+
+            # PID 저장
+            APP_PID=$!
+            echo $APP_PID > ../app.pid
+            echo "Application started with PID: $APP_PID"
+
+            # 애플리케이션 시작 대기
+            echo "=== Waiting for application startup ==="
+            sleep 20
+
+            # 프로세스 확인
+            if ps -p $APP_PID > /dev/null 2>&1; then
+                echo "✅ Application is running successfully"
+                echo "Process info:"
+                ps -o pid,cmd,%cpu,%mem -p $APP_PID
+            else
+                echo "❌ Application failed to start"
+                echo "Checking for any Java processes:"
+                ps aux | grep java || echo "No Java processes found"
+                exit 1
+            fi
+
+            # logback 설정에 따른 로그 파일 확인 (logs/umc-hackathon.log)
+            echo "=== Application Logs Check ==="
+            if [ -f logs/umc-hackathon.log ]; then
+                echo "Application log file exists"
+                echo "Recent logs from umc-hackathon.log:"
+                tail -20 logs/umc-hackathon.log
+            else
+                echo "Log file not yet created, waiting..."
+                sleep 10
+                if [ -f logs/umc-hackathon.log ]; then
+                    echo "Log file created:"
+                    tail -10 logs/umc-hackathon.log
+                else
+                    echo "⚠️ Log file still not found"
+                fi
+            fi
+
+            echo "=== Deployment completed successfully ==="
 
           EOF
 
