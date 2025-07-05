@@ -63,8 +63,9 @@ public class PerfumeService {
             log.info("향수 생성 완료 - ID: {}, 사용자: {}, 타입: {}", 
                     savedPerfume.getId(), existingUser.getNickname(), sourceType);
             
-            // 6. 응답 DTO 생성 및 반환
-            return PerfumeResponseDto.from(savedPerfume);
+            // 6. 응답 DTO 생성 및 반환 (sourceType을 클라이언트용으로 변환)
+            PerfumeResponseDto dto = PerfumeResponseDto.from(savedPerfume);
+            return dto.withClientSourceType(convertToClientSourceType(savedPerfume.getSourceType()));
             
         } catch (Exception e) {
             log.error("향수 생성 중 오류 발생: ", e);
@@ -125,7 +126,9 @@ public class PerfumeService {
         
         log.info("향수 조회 완료 - ID: {}, 사용자: {}", id, perfume.getUser().getNickname());
         
-        return PerfumeResponseDto.from(perfume);
+        PerfumeResponseDto dto = PerfumeResponseDto.from(perfume);
+        // sourceType을 클라이언트용으로 변환
+        return dto.withClientSourceType(convertToClientSourceType(perfume.getSourceType()));
     }
 
     /**
@@ -145,7 +148,11 @@ public class PerfumeService {
         log.info("사용자 향수 목록 조회 완료 - 사용자: {}, 향수 개수: {}", user.getNickname(), perfumes.size());
         
         return perfumes.stream()
-                .map(PerfumeResponseDto::from)
+                .map(perfume -> {
+                    PerfumeResponseDto dto = PerfumeResponseDto.from(perfume);
+                    // sourceType을 클라이언트용으로 변환
+                    return dto.withClientSourceType(convertToClientSourceType(perfume.getSourceType()));
+                })
                 .collect(Collectors.toList());
     }
 
