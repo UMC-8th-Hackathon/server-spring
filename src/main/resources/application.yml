@@ -36,3 +36,7 @@ server:
 logging:
   level:
     com.umc: DEBUG
+
+# jwt 설정
+jwt:
+  secret: my-super-secret-jwt-key-that-is-very-long-256bit
