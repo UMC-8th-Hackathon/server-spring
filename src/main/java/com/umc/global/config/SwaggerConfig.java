@@ -9,6 +9,8 @@ import io.swagger.v3.oas.models.media.Content;
 import io.swagger.v3.oas.models.media.MediaType;
 import io.swagger.v3.oas.models.responses.ApiResponse;
 import io.swagger.v3.oas.models.responses.ApiResponses;
+import io.swagger.v3.oas.models.security.SecurityRequirement;
+import io.swagger.v3.oas.models.security.SecurityScheme;
 import lombok.Builder;
 import lombok.Getter;
 import org.springdoc.core.customizers.OperationCustomizer;
@@ -36,7 +38,14 @@ public class SwaggerConfig {
                 .info(new Info()
                         .title("UMC Hackathon API")
                         .description("UMC 8기 해커톤 REST API 문서 영상팀")
-                        .version("v1.0.0"));
+                        .version("v1.0.0"))
+                .components(new io.swagger.v3.oas.models.Components()
+                        .addSecuritySchemes("bearerAuth", new SecurityScheme()
+                                .type(SecurityScheme.Type.HTTP)
+                                .scheme("bearer")
+                                .bearerFormat("JWT")
+                                .description("JWT 토큰을 입력하세요. (Bearer 제외)")))
+                .addSecurityItem(new SecurityRequirement().addList("bearerAuth"));
     }
 
     @Bean
