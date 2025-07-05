@@ -6,6 +6,8 @@ import com.umc.auth.dto.TokenResponse;
 import com.umc.common.response.ApiResponse;
 import com.umc.domain.user.entity.User;
 import com.umc.domain.user.repository.UserRepository;
+import com.umc.global.exception.BusinessException;
+import com.umc.global.exception.ErrorCode;
 import io.swagger.v3.oas.annotations.Operation;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -41,7 +43,7 @@ public class AuthController {
 
         // 기존 유저인 경우 비밀번호 검증
         if (!passwordEncoder.matches(request.password(), user.getPassword())) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+            throw new BusinessException(ErrorCode.DUPLICATE_NICKNAME);
         }
 
         // JWT 발급

@@ -3,13 +3,18 @@ package com.umc.domain.review.controller;
 import com.umc.auth.Jwt.JwtProvider;
 import com.umc.auth.util.JwtUtil;
 import com.umc.common.response.ApiResponse;
+import com.umc.domain.perfume.dto.PerfumeResponseDto;
 import com.umc.domain.review.dto.ReviewRequestDTO;
 import com.umc.domain.review.dto.ReviewResponseDTO;
 import com.umc.domain.review.service.ReviewService;
 import com.umc.domain.user.entity.User;
+import com.umc.global.exception.BusinessException;
 import com.umc.global.exception.ErrorCode;
 import io.jsonwebtoken.JwtException;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
@@ -58,7 +63,7 @@ public class ReviewController {
         log.info("내 리뷰 조회 요청 - Authorization: {}", authorization);
 
         if (authorization == null || authorization.trim().isEmpty()) {
-            throw new RuntimeException("Authorization 헤더가 없습니다. 헤더를 확인해주세요.");
+            throw new BusinessException(ErrorCode.TOKEN_INVALID);
         }
 
         User user = jwtUtil.getUserFromHeader(authorization);
