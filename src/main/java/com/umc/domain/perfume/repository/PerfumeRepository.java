@@ -2,6 +2,7 @@ package com.umc.domain.perfume.repository;
 
 import com.umc.domain.perfume.entity.Perfume;
 import com.umc.domain.perfume.entity.SourceType;
+import java.util.List;
 import com.umc.domain.user.entity.User;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -57,4 +58,9 @@ public interface PerfumeRepository extends JpaRepository<Perfume, Long> {
      */
     @Query("SELECT COUNT(p) > 0 FROM Perfume p WHERE p.user.id = :userId")
     boolean existsByUserId(@Param("userId") Long userId);
+    
+    /**
+     * 소스 타입별 최근 향수 10개 조회 (추천용)
+     */
+    List<Perfume> findTop10BySourceTypeOrderByCreatedAtDesc(SourceType sourceType);
 }
