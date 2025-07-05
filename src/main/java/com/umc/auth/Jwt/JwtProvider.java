@@ -1,6 +1,6 @@
 package com.umc.auth.Jwt;
 
-import com.umc.user.domain.User;
+import com.umc.domain.user.entity.User;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.security.Keys;
