@@ -3,23 +3,20 @@ package com.umc.domain.review.controller;
 import com.umc.auth.Jwt.JwtProvider;
 import com.umc.auth.util.JwtUtil;
 import com.umc.common.response.ApiResponse;
-import com.umc.domain.perfume.dto.PerfumeResponseDto;
 import com.umc.domain.review.dto.ReviewRequestDTO;
 import com.umc.domain.review.dto.ReviewResponseDTO;
 import com.umc.domain.review.service.ReviewService;
 import com.umc.domain.user.entity.User;
-import com.umc.global.exception.BusinessException;
+import com.umc.global.config.SwaggerConfig;
 import com.umc.global.exception.ErrorCode;
 import io.jsonwebtoken.JwtException;
-import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.media.Content;
-import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
+import io.swagger.v3.oas.annotations.Operation;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -39,6 +36,14 @@ public class ReviewController {
             description = "특정 향수에 대한 리뷰를 작성합니다.",
             security = @SecurityRequirement(name = "bearerAuth")
     )
+    @SwaggerConfig.ApiErrorExamples({
+            ErrorCode.TOKEN_INVALID,
+            ErrorCode.PERFUME_NOT_FOUND,
+            ErrorCode.USER_NOT_FOUND,
+            ErrorCode.PERFUME_INVALID_INPUT_VALUE,
+            ErrorCode.REVIEW_DESCRIPTION_EMPTY,
+            ErrorCode.INTERNAL_SERVER_ERROR
+    })
     public ResponseEntity<ApiResponse<ReviewResponseDTO.CreateReviewReponseDTO>> createReview(
             @PathVariable Long perfumeId,
             @RequestBody ReviewRequestDTO.CreateReviewRequestDTO request,
@@ -58,12 +63,17 @@ public class ReviewController {
 
     @GetMapping("/me")
     @Operation(summary = "내가 작성한 리뷰 목록 조회", security = @SecurityRequirement(name = "bearerAuth"))
+    @SwaggerConfig.ApiErrorExamples({
+            ErrorCode.TOKEN_INVALID,
+            ErrorCode.USER_NOT_FOUND,
+            ErrorCode.INTERNAL_SERVER_ERROR
+    })
     public ResponseEntity<ApiResponse<List<ReviewResponseDTO.MyReviewDTO>>> getMyReviews(HttpServletRequest httpRequest) {
         String authorization = httpRequest.getHeader("Authorization");
         log.info("내 리뷰 조회 요청 - Authorization: {}", authorization);
 
         if (authorization == null || authorization.trim().isEmpty()) {
-            throw new BusinessException(ErrorCode.TOKEN_INVALID);
+            throw new RuntimeException("Authorization 헤더가 없습니다. 헤더를 확인해주세요.");
         }
 
         User user = jwtUtil.getUserFromHeader(authorization);
@@ -73,6 +83,12 @@ public class ReviewController {
 
     @GetMapping("/{perfumeId}")
     @Operation(summary = "특정 향수 리뷰 목록 조회")
+    @SwaggerConfig.ApiErrorExamples({
+            ErrorCode.PERFUME_NOT_FOUND,
+            ErrorCode.USER_NOT_FOUND,
+            ErrorCode.PERFUME_INVALID_INPUT_VALUE,
+            ErrorCode.INTERNAL_SERVER_ERROR
+    })
     public ResponseEntity<ApiResponse<List<ReviewResponseDTO.ReviewSimpleDTO>>> getReviewsByPerfume(
             @PathVariable Long perfumeId) {
 
