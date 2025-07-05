@@ -6,6 +6,7 @@ import com.umc.domain.user.converter.UserConverter;
 import com.umc.domain.user.dto.UserResponseDTO;
 import com.umc.domain.user.entity.User;
 import com.umc.domain.user.repository.UserRepository;
+import com.umc.global.config.SwaggerConfig;
 import com.umc.global.exception.BusinessException;
 import com.umc.global.exception.ErrorCode;
 import io.swagger.v3.oas.annotations.Operation;
@@ -35,6 +36,9 @@ public class UserController {
     @GetMapping("/me")
     @Operation(summary = "자신의 닉네임 조회", description = "JWT 토큰을 기반으로 현재 유저의 닉네임을 조회합니다.",
             security = @SecurityRequirement(name = "bearerAuth"))
+    @SwaggerConfig.ApiErrorExamples({
+            ErrorCode.TOKEN_INVALID
+    })
     public ResponseEntity<ApiResponse<UserResponseDTO.MyNameDTO>> getMyNickname(HttpServletRequest request) {
         String authorization = request.getHeader("Authorization");
         log.info("닉네임 조회 요청 - Authorization: {}", authorization);
