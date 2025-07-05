@@ -27,6 +27,11 @@ jobs:
           echo "${{ secrets.APPLICATION_PROD_YML }}" > ./src/main/resources/application-prod.yml
         shell: bash
 
+      - name: Generate Google Service Account Key
+        run: |
+          echo "${{ secrets.GOOGLE_SERVICE_ACCOUNT_KEY }}" > ./src/main/resources/jovial-monument-432709-s0-5455a7338d58.json
+        shell: bash
+
       - name: Grant permission to gradlew
         run: chmod +x gradlew
 

@@ -85,4 +85,8 @@ node_modules/
 ### Application specific ###
 application-dev.yml
 application-prod.yml
-application-local.yml 
+application-local.yml
+
+### Google Service Account Keys ###
+jovial-monument-432709-s0-5455a7338d58.json
+*service-account*.json 

@@ -31,3 +31,10 @@ server:
   port: 8080
 jwt:
   secret: my-super-secret-jwt-key-that-is-very-long-256bit
+
+# Google Drive 설정
+google:
+  drive:
+    service-account-key-path: classpath:jovial-monument-432709-s0-5455a7338d58.json
+    parent-folder-id: root
+    application-name: UMC-Hackathon-Spring

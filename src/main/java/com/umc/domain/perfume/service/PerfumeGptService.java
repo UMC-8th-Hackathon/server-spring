@@ -4,6 +4,8 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.umc.domain.perfume.entity.SourceType;
 import com.umc.domain.perfume.entity.Perfume;
+import com.umc.domain.file.dto.FileUploadResponse;
+import com.umc.domain.file.service.GoogleDriveService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -15,6 +17,7 @@ import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -26,6 +29,7 @@ public class PerfumeGptService {
 
     private final RestTemplate restTemplate;
     private final ObjectMapper objectMapper;
+    private final GoogleDriveService googleDriveService;
 
     @Value("${openai.api.key}")
     private String apiKey;
@@ -41,7 +45,31 @@ public class PerfumeGptService {
      */
     public Perfume generatePerfume(SourceType sourceType, String url, MultipartFile file) {
         String description = generatePerfumeDescription(sourceType, file);
-        return createPerfumeEntity(sourceType, url, description);
+        Perfume perfume = createPerfumeEntity(sourceType, url, description);
+        
+        return perfume;
+    }
+
+    /**
+     * 향수 생성 후 파일 업로드 및 URL 업데이트
+     */
+    public void uploadFileAndUpdateUrl(Perfume perfume, MultipartFile file) throws IOException {
+        try {
+            log.info("파일 업로드 시작 - 향수 ID: {}, 파일명: {}", perfume.getId(), file.getOriginalFilename());
+            
+            String recordId = perfume.getId().toString();
+            FileUploadResponse fileResponse = googleDriveService.uploadFile(file, recordId);
+            
+            // 향수 엔티티의 URL을 구글 드라이브 URL로 업데이트
+            String oldUrl = perfume.getUrl();
+            perfume.setUrl(fileResponse.getPublicUrl());
+            
+            log.info("파일 업로드 완료: {} - URL 변경: {} -> {}", 
+                    fileResponse.getFileName(), oldUrl, fileResponse.getPublicUrl());
+        } catch (Exception e) {
+            log.error("파일 업로드 실패 - 향수 ID: {}, 오류: {}", perfume.getId(), e.getMessage(), e);
+            throw e; // 상위로 예외 전파
+        }
     }
 
     /**
