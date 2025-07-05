@@ -39,6 +39,9 @@ dependencies {
 	// H2 데이터베이스 (개발/테스트용)
 	runtimeOnly 'com.h2database:h2'
 	
+	// MariaDB 드라이버 (프로덕션용)
+	runtimeOnly 'org.mariadb.jdbc:mariadb-java-client'
+	
 	compileOnly 'org.projectlombok:lombok'
 	annotationProcessor 'org.projectlombok:lombok'
 	
