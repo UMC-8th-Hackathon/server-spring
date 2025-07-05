@@ -4,6 +4,7 @@ import com.umc.domain.perfume.dto.PerfumeResponseDto;
 import com.umc.domain.perfume.entity.Perfume;
 import com.umc.domain.perfume.entity.SourceType;
 import com.umc.domain.perfume.repository.PerfumeRepository;
+import com.umc.domain.user.entity.User;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -24,7 +25,7 @@ public class PerfumeService {
     /**
      * 향수 생성
      */
-    public PerfumeResponseDto createPerfume(SourceType sourceType, MultipartFile file) {
+    public PerfumeResponseDto createPerfume(SourceType sourceType, MultipartFile file, User user) {
         try {
             // 1. 가상 URL 생성 (실제 파일 저장 없음)
             String virtualFileUrl = generateVirtualFileUrl(file);
@@ -32,10 +33,13 @@ public class PerfumeService {
             // 2. GPT를 통한 향수 정보 생성 (파일 직접 전달)
             Perfume perfume = perfumeGptService.generatePerfume(sourceType, virtualFileUrl, file);
             
-            // 3. 데이터베이스에 저장
+            // 3. 사용자 정보 설정
+            perfume.setUser(user);
+            
+            // 4. 데이터베이스에 저장
             Perfume savedPerfume = perfumeRepository.save(perfume);
             
-            // 4. 응답 DTO 생성 및 반환
+            // 5. 응답 DTO 생성 및 반환
             return PerfumeResponseDto.from(savedPerfume);
             
         } catch (Exception e) {
