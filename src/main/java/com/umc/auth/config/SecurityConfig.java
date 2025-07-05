@@ -18,15 +18,7 @@ public class SecurityConfig {
         http
                 .csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers(
-                                "/api/auth/**",                 // 로그인 관련
-                                "/swagger-ui/**",              // Swagger UI
-                                "/v3/api-docs/**",             // OpenAPI 문서
-                                "/swagger-resources/**",       // Swagger 리소스
-                                "/webjars/**",                 // Swagger 자바스크립트 리소스
-                                "/favicon.ico"
-                        ).permitAll()
-                        .anyRequest().authenticated()     // 나머지는 인증 필요
+                        .anyRequest().permitAll() // 모든 요청을 인증 없이 허용
                 );
 
         return http.build();
