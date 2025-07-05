@@ -1,4 +1,4 @@
-package com.divary.domain.system.controller;
+package com.umc.domain.system.controller;
 
 import com.divary.common.response.ApiResponse;
 import com.divary.global.config.SwaggerConfig.ApiErrorExamples;

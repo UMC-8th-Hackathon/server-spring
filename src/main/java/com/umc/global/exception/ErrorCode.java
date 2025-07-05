@@ -1,4 +1,4 @@
-package com.divary.global.exception;
+package com.umc.global.exception;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;

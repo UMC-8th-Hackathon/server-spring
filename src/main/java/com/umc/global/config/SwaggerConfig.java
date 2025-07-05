@@ -1,4 +1,4 @@
-package com.divary.global.config;
+package com.umc.global.config;
 
 import com.divary.global.exception.ErrorCode;
 import io.swagger.v3.oas.models.OpenAPI;

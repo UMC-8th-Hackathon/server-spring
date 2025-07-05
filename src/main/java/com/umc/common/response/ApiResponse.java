@@ -1,4 +1,4 @@
-package com.divary.common.response;
+package com.umc.common.response;
 
 import com.divary.global.exception.ErrorCode;
 import com.fasterxml.jackson.annotation.JsonInclude;

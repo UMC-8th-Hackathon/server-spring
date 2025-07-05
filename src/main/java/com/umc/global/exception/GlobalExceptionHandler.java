@@ -1,4 +1,4 @@
-package com.divary.global.exception;
+package com.umc.global.exception;
 
 import com.divary.common.response.ApiResponse;
 import lombok.extern.slf4j.Slf4j;

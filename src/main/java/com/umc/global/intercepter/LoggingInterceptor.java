@@ -1,4 +1,4 @@
-package com.divary.global.intercepter;
+package com.umc.global.intercepter;
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
