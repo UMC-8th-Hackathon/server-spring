@@ -34,8 +34,8 @@ public class SwaggerConfig {
     public OpenAPI openAPI() {
         return new OpenAPI()
                 .info(new Info()
-                        .title("Divary API")
-                        .description("다이빙 서포트 앱 Divary의 REST API 문서")
+                        .title("UMC Hackathon API")
+                        .description("UMC 8기 해커톤 REST API 문서 영상팀")
                         .version("v1.0.0"));
     }
 
