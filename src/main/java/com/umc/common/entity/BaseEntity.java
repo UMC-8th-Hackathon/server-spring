@@ -1,4 +1,4 @@
-package com.divary.common.entity;
+package com.umc.common.entity;
 
 import jakarta.persistence.*;
 import lombok.Getter;

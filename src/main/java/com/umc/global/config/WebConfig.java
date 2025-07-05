@@ -1,4 +1,4 @@
-package com.divary.global.config;
+package com.umc.global.config;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Configuration;
