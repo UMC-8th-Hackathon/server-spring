@@ -2,37 +2,32 @@ spring:
   application:
     name: umc-hackathon-spring
 
-  # 데이터베이스 설정 (H2 인메모리)
-  datasource:
-    url: jdbc:h2:mem:umc-hackathon
-    driver-class-name: org.h2.Driver
-    username: sa
-    password: ""
+  profiles:
+    active: dev
 
-  # JPA/Hibernate 설정
   jpa:
     hibernate:
-      ddl-auto: create-drop
+      ddl-auto: update
     show-sql: true
     properties:
       hibernate:
         format_sql: true
-        dialect: org.hibernate.dialect.H2Dialect
-
-  # H2 콘솔 설정 (개발용)
-  h2:
-    console:
-      enabled: true
-      path: /h2-console
+        dialect: org.hibernate.dialect.MySQLDialect
+        id:
+          new_generator_mappings: false # <-- 이거 추가
 
   # Thymeleaf 설정
   thymeleaf:
     cache: false
 
+  # 파일 업로드 설정
+  servlet:
+    multipart:
+      max-file-size: 10MB
+      max-request-size: 10MB
+      enabled: true
+
 server:
   port: 8080
-
-# 로깅 설정
-logging:
-  level:
-    com.umc: DEBUG
+jwt:
+  secret: my-super-secret-jwt-key-that-is-very-long-256bit
