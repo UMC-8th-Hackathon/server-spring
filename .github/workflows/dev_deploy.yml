@@ -1,4 +1,4 @@
-name: Divary CI/CD
+name: UMC Hackathon CI/CD
 
 on:
   push:
@@ -33,18 +33,18 @@ jobs:
       - name: Build with Gradle
         run: ./gradlew build
 
-      - name: Compress JAR with tar.gz  # jar 파일 압축
+      - name: Compress JAR with tar.gz # jar 파일 압축
         run: |
           mkdir -p package
           cp build/libs/*.jar package/
-          tar -czf divary-app.tar.gz -C package .
+          tar -czf umc-hackathon-app.tar.gz -C package .
         shell: bash
 
       - name: Upload build artifact
         uses: actions/upload-artifact@v4
         with:
-          name: divary-artifact
-          path: divary-app.tar.gz  # 압축된 tar.gz 파일만 업로드
+          name: umc-hackathon-artifact
+          path: umc-hackathon-app.tar.gz # 압축된 tar.gz 파일만 업로드
 
   deploy:
     needs: build
@@ -55,7 +55,7 @@ jobs:
       - name: Download build artifact
         uses: actions/download-artifact@v4
         with:
-          name: divary-artifact
+          name: umc-hackathon-artifact
           path: ./deploy-package
 
       - name: Deploy to EC2
@@ -67,24 +67,24 @@ jobs:
           echo "$EC2_SSH_KEY" > private_key.pem
           chmod 600 private_key.pem
 
-          tar_file=deploy-package/divary-app.tar.gz
+                    tar_file=deploy-package/umc-hackathon-app.tar.gz
 
           # tar.gz 파일을 EC2로 전송
-          scp -i private_key.pem -o StrictHostKeyChecking=no "$tar_file" $EC2_USERNAME@$EC2_HOST:/home/$EC2_USERNAME/divary-app.tar.gz
+          scp -i private_key.pem -o StrictHostKeyChecking=no "$tar_file" $EC2_USERNAME@$EC2_HOST:/home/$EC2_USERNAME/umc-hackathon-app.tar.gz
 
           # EC2에서 압축 해제 후 실행
           ssh -i private_key.pem -o StrictHostKeyChecking=no $EC2_USERNAME@$EC2_HOST << EOF
             set -e
             cd /home/ubuntu
 
-            rm -rf divary-app
-            mkdir -p divary-app
-            tar -xzf divary-app.tar.gz -C divary-app
+            rm -rf umc-hackathon-app
+            mkdir -p umc-hackathon-app
+            tar -xzf umc-hackathon-app.tar.gz -C umc-hackathon-app
 
              # systemd 재시작
             sudo systemctl daemon-reload
-            sudo systemctl restart divary
-            sudo systemctl is-active divary
+            sudo systemctl restart umc-hackathon
+            sudo systemctl is-active umc-hackathon
 
           EOF
 
