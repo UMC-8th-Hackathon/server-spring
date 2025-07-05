@@ -23,6 +23,11 @@ public class ShopServiceImpl implements ShopService {
         double minLng = centerLng - delta;
         double maxLng = centerLng + delta;
 
+        System.out.println("lat: " + centerLat);
+        System.out.println("lng: " + centerLng);
+
+
+
         // 범위 내 가게 조회
         List<Shop> shops = shopRepository.findByLatitudeBetweenAndLongitudeBetween(
                 minLat, maxLat, minLng, maxLng
