@@ -3,11 +3,14 @@ package com.umc.domain.review.controller;
 import com.umc.auth.Jwt.JwtProvider;
 import com.umc.auth.util.JwtUtil;
 import com.umc.common.response.ApiResponse;
+import com.umc.domain.perfume.entity.Perfume;
+import com.umc.domain.perfume.repository.PerfumeRepository;
 import com.umc.domain.review.dto.ReviewRequestDTO;
 import com.umc.domain.review.dto.ReviewResponseDTO;
 import com.umc.domain.review.service.ReviewService;
 import com.umc.domain.user.entity.User;
 import com.umc.global.config.SwaggerConfig;
+import com.umc.global.exception.BusinessException;
 import com.umc.global.exception.ErrorCode;
 import io.jsonwebtoken.JwtException;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
@@ -29,6 +32,7 @@ public class ReviewController {
 
     private final ReviewService reviewService;
     private final JwtUtil jwtUtil;
+    private final PerfumeRepository perfumeRepository;
 
     @PostMapping("/{perfumeId}")
     @Operation(
@@ -39,7 +43,6 @@ public class ReviewController {
     @SwaggerConfig.ApiErrorExamples({
             ErrorCode.TOKEN_INVALID,
             ErrorCode.PERFUME_NOT_FOUND,
-            ErrorCode.USER_NOT_FOUND,
             ErrorCode.PERFUME_INVALID_INPUT_VALUE,
             ErrorCode.REVIEW_DESCRIPTION_EMPTY,
             ErrorCode.INTERNAL_SERVER_ERROR
@@ -53,10 +56,11 @@ public class ReviewController {
         log.info("리뷰 생성 요청 - perfumeId: {}, Authorization: {}", perfumeId, authorization);
 
         if (authorization == null || authorization.trim().isEmpty()) {
-            throw new RuntimeException("Authorization 헤더가 없습니다. 헤더를 확인해주세요.");
+            throw new BusinessException(ErrorCode.TOKEN_INVALID);
         }
 
         User user = jwtUtil.getUserFromHeader(authorization);
+
         ReviewResponseDTO.CreateReviewReponseDTO result = reviewService.createReview(perfumeId, user.getId(), request);
         return ResponseEntity.ok(ApiResponse.success("리뷰가 성공적으로 등록되었습니다.", result));
     }
@@ -73,7 +77,7 @@ public class ReviewController {
         log.info("내 리뷰 조회 요청 - Authorization: {}", authorization);
 
         if (authorization == null || authorization.trim().isEmpty()) {
-            throw new RuntimeException("Authorization 헤더가 없습니다. 헤더를 확인해주세요.");
+            throw new BusinessException(ErrorCode.TOKEN_INVALID);
         }
 
         User user = jwtUtil.getUserFromHeader(authorization);
