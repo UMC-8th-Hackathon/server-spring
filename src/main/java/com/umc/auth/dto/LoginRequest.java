@@ -1,4 +1,6 @@
 package com.umc.auth.dto;
 
-public class LoginRequest {
-}
+import jakarta.validation.constraints.NotBlank;
+
+// 요청 DTO
+public record LoginRequest(@NotBlank String nickname, @NotBlank String password) {}
