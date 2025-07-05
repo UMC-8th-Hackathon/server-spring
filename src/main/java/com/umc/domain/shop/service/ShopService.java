@@ -1,9 +1,10 @@
 package com.umc.domain.shop.service;
 
-import com.umc.domain.shop.entity.Shop;
+import com.umc.domain.shop.dto.ShopResponseDto;
 
 import java.util.List;
 
 public interface ShopService {
-    List<Shop> findNearbyShops(double centerLat, double centerLng, double radiusKm, int limit);
+    // 반경, 리밋은 내부에서 고정 (예: 5km, 5개)
+    List<ShopResponseDto> findNearbyShops(double latitude, double longitude);
 }
