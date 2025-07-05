@@ -38,6 +38,10 @@ public enum ErrorCode {
     // 리뷰 관련 에러
     REVIEW_DESCRIPTION_EMPTY(HttpStatus.BAD_REQUEST, "REVIEW_4001", "리뷰 내용은 비어 있을 수 없습니다."),
 
+    // 매장 관련 에러
+    SHOP_INVALID_COORDINATES(HttpStatus.BAD_REQUEST, "SHOP_4001", "잘못된 위도 또는 경도 값입니다."),
+    SHOP_SEARCH_FAILED(HttpStatus.INTERNAL_SERVER_ERROR, "SHOP_5001", "매장 검색에 실패했습니다."),
+
     // 유저 관련 에러
     USER_NOT_FOUND(HttpStatus.NOT_FOUND, "USER_4001", "해당 사용자를 찾을 수 없습니다.");
 
