@@ -18,7 +18,5 @@ public class ReviewRequestDTO {
     @AllArgsConstructor
     public static class CreatReviewRequestDTO {
         private String description;
-        private LocalDateTime createdAt;
-        private LocalDateTime updatedAt;
     }
 }

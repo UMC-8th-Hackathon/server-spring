@@ -36,7 +36,7 @@ public class ReviewResponseDTO {
     @AllArgsConstructor
     public static class MyReviewDTO {
         private Long id;
-        private PerfumeDTO perfume;
+        private Long perfumeId;
         private String description;
         private LocalDateTime createdAt;
     }

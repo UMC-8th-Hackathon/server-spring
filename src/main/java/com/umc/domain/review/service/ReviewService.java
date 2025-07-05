@@ -1,5 +1,7 @@
 package com.umc.domain.review.service;
 
+import com.umc.domain.perfume.entity.Perfume;
+import com.umc.domain.perfume.repository.PerfumeRepository;
 import com.umc.domain.review.converter.ReviewConverter;
 import com.umc.domain.review.dto.ReviewRequestDTO;
 import com.umc.domain.review.dto.ReviewResponseDTO;
@@ -13,6 +15,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -21,6 +24,7 @@ public class ReviewService {
 
     private final ReviewRepository reviewRepository;
     private final UserRepository userRepository;
+    private final PerfumeRepository perfumeRepository;
 
     @Transactional
     public ReviewResponseDTO.CreateReviewReponseDTO createReview(Long perfumeId, Long userId, ReviewRequestDTO.CreatReviewRequestDTO request) {
@@ -39,12 +43,19 @@ public class ReviewService {
 
         return reviews.stream()
                 .map(review -> {
-                    Perfume perfume = perfumeRepository.findById(review.getPerfumeId());
-                    return ReviewConverter.toMyReviewDTO(review, perfume);
+                    Perfume perfume = perfumeRepository.findById(review.getPerfumeId())
+                            .orElseThrow(() -> new IllegalArgumentException("해당 향수가 존재하지 않습니다."));
+
+                    ReviewResponseDTO.PerfumeDTO perfumeDTO = ReviewResponseDTO.PerfumeDTO.builder()
+                            .id(perfume.getId())
+                            .build();
+
+                    return ReviewConverter.toMyReviewDTO(review);
                 })
                 .collect(Collectors.toList());
     }
 
+    @Transactional(readOnly = true)
     public List<ReviewResponseDTO.ReviewSimpleDTO> getReviewsByPerfumeId(Long perfumeId) {
         List<Review> reviews = reviewRepository.findByPerfumeIdOrderByCreatedAtDesc(perfumeId);
 
@@ -57,3 +68,4 @@ public class ReviewService {
         }).collect(Collectors.toList());
     }
 }
+
