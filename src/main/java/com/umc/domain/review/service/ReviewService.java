@@ -44,4 +44,16 @@ public class ReviewService {
                 })
                 .collect(Collectors.toList());
     }
+
+    public List<ReviewResponseDTO.ReviewSimpleDTO> getReviewsByPerfumeId(Long perfumeId) {
+        List<Review> reviews = reviewRepository.findByPerfumeIdOrderByCreatedAtDesc(perfumeId);
+
+        return reviews.stream().map(review -> {
+            String nickname = userRepository.findById(review.getUserId())
+                    .map(User::getNickname)
+                    .orElse("알 수 없음");
+
+            return ReviewConverter.toReviewSimpleDTO(review, nickname);
+        }).collect(Collectors.toList());
+    }
 }

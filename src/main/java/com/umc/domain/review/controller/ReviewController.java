@@ -65,4 +65,14 @@ public class ReviewController {
         List<ReviewResponseDTO.MyReviewDTO> result = reviewService.getMyReviews(userId);
         return ResponseEntity.ok(ApiResponse.success("내가 작성한 리뷰 목록 조회 성공", result));
     }
+
+    @GetMapping("/{perfumeId}")
+    public ResponseEntity<ApiResponse<List<ReviewResponseDTO.ReviewSimpleDTO>>> getReviewsByPerfume(
+            @PathVariable Long perfumeId) {
+        List<ReviewResponseDTO.ReviewSimpleDTO> result = reviewService.getReviewsByPerfumeId(perfumeId);
+
+        //에러처리 나중에 추가 예정
+
+        return ResponseEntity.ok(ApiResponse.success("리뷰 목록 조회 성공", result));
+    }
 }
