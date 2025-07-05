@@ -28,6 +28,12 @@ public enum ErrorCode {
     // 향수 관련 에러
     PERFUME_NOT_FOUND(HttpStatus.NOT_FOUND, "PERFUME_4001", "해당 향수를 찾을 수 없습니다."),
     PERFUME_INVALID_INPUT_VALUE(HttpStatus.BAD_REQUEST, "PERFUME_4002", "perfumeId가 잘못된 형식입니다."),
+    PERFUME_FILE_EMPTY(HttpStatus.BAD_REQUEST, "PERFUME_4003", "파일이 비어있습니다."),
+    PERFUME_FILE_SIZE_EXCEEDED(HttpStatus.BAD_REQUEST, "PERFUME_4004", "파일 크기가 제한을 초과했습니다."),
+    PERFUME_INVALID_FILE_TYPE(HttpStatus.BAD_REQUEST, "PERFUME_4005", "지원하지 않는 파일 형식입니다."),
+    PERFUME_INVALID_SOURCE_TYPE(HttpStatus.BAD_REQUEST, "PERFUME_4006", "잘못된 소스 타입입니다."),
+    PERFUME_CREATION_FAILED(HttpStatus.INTERNAL_SERVER_ERROR, "PERFUME_5001", "향수 생성에 실패했습니다."),
+    PERFUME_ACCESS_DENIED(HttpStatus.FORBIDDEN, "PERFUME_4007", "해당 향수에 대한 접근 권한이 없습니다."),
 
     // 리뷰 관련 에러
     REVIEW_DESCRIPTION_EMPTY(HttpStatus.BAD_REQUEST, "REVIEW_4001", "리뷰 내용은 비어 있을 수 없습니다."),
