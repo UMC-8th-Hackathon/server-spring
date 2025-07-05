@@ -29,7 +29,7 @@ jobs:
 
       - name: Generate Google Service Account Key
         run: |
-          echo "${{ secrets.GOOGLE_SERVICE_ACCOUNT_KEY }}" > ./src/main/resources/jovial-monument-432709-s0-5455a7338d58.json
+          echo '${{ secrets.GOOGLE_SERVICE_ACCOUNT_KEY_BASE64 }}' | base64 -d > ./src/main/resources/jovial-monument-432709-s0-5455a7338d58.json
         shell: bash
 
       - name: Grant permission to gradlew
