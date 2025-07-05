@@ -1,10 +1,13 @@
 package com.umc.domain.review.converter;
 
 
+import com.umc.domain.perfume.entity.Perfume;
 import com.umc.domain.review.dto.ReviewRequestDTO;
 import com.umc.domain.review.dto.ReviewResponseDTO;
 import com.umc.domain.review.entity.Review;
 import com.umc.domain.user.entity.User;
+
+import java.util.Optional;
 
 public class ReviewConverter {
 
@@ -28,6 +31,15 @@ public class ReviewConverter {
                 )
                 .createdAt(review.getCreatedAt())
                 .updatedAt(review.getUpdatedAt())
+                .build();
+    }
+
+    public static ReviewResponseDTO.MyReviewDTO toMyReviewDTO(Review review) {
+        return ReviewResponseDTO.MyReviewDTO.builder()
+                .id(review.getId())
+                .description(review.getDescription())
+                .createdAt(review.getCreatedAt())
+                .perfumeId(review.getPerfumeId())
                 .build();
     }
 

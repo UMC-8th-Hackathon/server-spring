@@ -50,6 +50,22 @@ public class ReviewController {
         return ResponseEntity.ok(ApiResponse.success("리뷰가 성공적으로 등록되었습니다.", result));
     }
 
+    @GetMapping("/me")
+    public ResponseEntity<ApiResponse<List<ReviewResponseDTO.MyReviewDTO>>> getMyReviews(
+            @RequestHeader("Authorization") String token
+    ) {
+        String parsedToken = token.replace("Bearer ", "");
+        Long userId;
+        try {
+            userId = jwtTokenProvider.getUserId(parsedToken);
+        } catch (JwtException | IllegalArgumentException e) {
+            return ResponseEntity.status(ErrorCode.TOKEN_INVALID.getStatus()).build();
+        }
+
+        List<ReviewResponseDTO.MyReviewDTO> result = reviewService.getMyReviews(userId);
+        return ResponseEntity.ok(ApiResponse.success("내가 작성한 리뷰 목록 조회 성공", result));
+    }
+
     @GetMapping("/{perfumeId}")
     public ResponseEntity<ApiResponse<List<ReviewResponseDTO.ReviewSimpleDTO>>> getReviewsByPerfume(
             @PathVariable Long perfumeId) {

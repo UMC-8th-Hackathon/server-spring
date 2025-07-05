@@ -1,5 +1,7 @@
 package com.umc.domain.review.service;
 
+import com.umc.domain.perfume.entity.Perfume;
+import com.umc.domain.perfume.repository.PerfumeRepository;
 import com.umc.domain.review.converter.ReviewConverter;
 import com.umc.domain.review.dto.ReviewRequestDTO;
 import com.umc.domain.review.dto.ReviewResponseDTO;
@@ -7,11 +9,13 @@ import com.umc.domain.review.entity.Review;
 import com.umc.domain.review.repository.ReviewRepository;
 import com.umc.domain.user.entity.User;
 import com.umc.domain.user.repository.UserRepository;
+import com.umc.global.exception.BusinessException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -20,6 +24,7 @@ public class ReviewService {
 
     private final ReviewRepository reviewRepository;
     private final UserRepository userRepository;
+    private final PerfumeRepository perfumeRepository;
 
     @Transactional
     public ReviewResponseDTO.CreateReviewReponseDTO createReview(Long perfumeId, Long userId, ReviewRequestDTO.CreatReviewRequestDTO request) {
@@ -32,6 +37,25 @@ public class ReviewService {
         return ReviewConverter.toCreateDTO(saved, user);
     }
 
+    @Transactional(readOnly = true)
+    public List<ReviewResponseDTO.MyReviewDTO> getMyReviews(Long userId) {
+        List<Review> reviews = reviewRepository.findByUserId(userId);
+
+        return reviews.stream()
+                .map(review -> {
+                    Perfume perfume = perfumeRepository.findById(review.getPerfumeId())
+                            .orElseThrow(() -> new IllegalArgumentException("해당 향수가 존재하지 않습니다."));
+
+                    ReviewResponseDTO.PerfumeDTO perfumeDTO = ReviewResponseDTO.PerfumeDTO.builder()
+                            .id(perfume.getId())
+                            .build();
+
+                    return ReviewConverter.toMyReviewDTO(review);
+                })
+                .collect(Collectors.toList());
+    }
+
+    @Transactional(readOnly = true)
     public List<ReviewResponseDTO.ReviewSimpleDTO> getReviewsByPerfumeId(Long perfumeId) {
         List<Review> reviews = reviewRepository.findByPerfumeIdOrderByCreatedAtDesc(perfumeId);
 
@@ -44,3 +68,4 @@ public class ReviewService {
         }).collect(Collectors.toList());
     }
 }
+

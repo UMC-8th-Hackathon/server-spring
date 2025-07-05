@@ -34,7 +34,27 @@ public class ReviewResponseDTO {
     @Getter
     @NoArgsConstructor
     @AllArgsConstructor
-    public static class ReviewSimpleDTO { // 특정 향수의 리뷰 목록 조회
+    public static class MyReviewDTO {
+        private Long id;
+        private Long perfumeId;
+        private String description;
+        private LocalDateTime createdAt;
+    }
+
+        @Builder
+        @Getter
+        @NoArgsConstructor
+        @AllArgsConstructor
+        public static class PerfumeDTO {
+            private Long id;
+            private String name;
+        }
+
+    @Builder
+    @Getter
+    @NoArgsConstructor
+    @AllArgsConstructor
+        public static class ReviewSimpleDTO { // 특정 향수의 리뷰 목록 조회
         private Long id;
         private String description;
         private UserDTO user;
