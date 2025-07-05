@@ -1,4 +1,4 @@
-package com.umc.domain.perfume;
+package com.umc.domain.perfume.entity;
 
 public enum SourceType {
     AUDIO,      // 오디오 소스
