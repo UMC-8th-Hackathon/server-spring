@@ -24,7 +24,14 @@ public enum ErrorCode {
     TOKEN_INVALID(HttpStatus.UNAUTHORIZED, "AUTH_001", "유효하지 않은 토큰입니다."),
 
     // 향수 관련 에러
-    PERFUME_NOT_FOUND(HttpStatus.NOT_FOUND, "PERFUME_001", "해당 향수를 찾을 수 없습니다.");
+    PERFUME_NOT_FOUND(HttpStatus.NOT_FOUND, "PERFUME_001", "해당 향수를 찾을 수 없습니다."),
+
+    // 공방 관련 에러
+    SHOP_NOT_FOUND(HttpStatus.NOT_FOUND, "SHOP_001", "해당 샵을 찾을 수 없습니다."),
+    SHOP_ACCESSIBILITY_NOT_SUPPORTED(HttpStatus.BAD_REQUEST, "SHOP_002", "해당 샵은 장애인 편의시설이 없습니다."),
+    SHOP_DISTANCE_TOO_FAR(HttpStatus.BAD_REQUEST, "SHOP_003", "주변에 가까운 샵이 존재하지 않습니다.");
+
+
 
     // TODO: 비즈니스 로직 개발하면서 필요한 에러코드들 추가
 
