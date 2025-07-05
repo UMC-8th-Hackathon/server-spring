@@ -9,13 +9,11 @@ import com.umc.domain.review.entity.Review;
 import com.umc.domain.review.repository.ReviewRepository;
 import com.umc.domain.user.entity.User;
 import com.umc.domain.user.repository.UserRepository;
-import com.umc.global.exception.BusinessException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -27,7 +25,7 @@ public class ReviewService {
     private final PerfumeRepository perfumeRepository;
 
     @Transactional
-    public ReviewResponseDTO.CreateReviewReponseDTO createReview(Long perfumeId, Long userId, ReviewRequestDTO.CreatReviewRequestDTO request) {
+    public ReviewResponseDTO.CreateReviewReponseDTO createReview(Long perfumeId, Long userId, ReviewRequestDTO.CreateReviewRequestDTO request) {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 사용자입니다."));
 
