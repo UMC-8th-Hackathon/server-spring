@@ -19,6 +19,8 @@ public enum ErrorCode {
 
     // 로그인 관련 에러
     DUPLICATE_NICKNAME(HttpStatus.CONFLICT, "LOGIN_4001", "이미 존재하는 닉네임입니다. 비밀번호를 다시 입력해주세요."),
+    LOGIN_NICKNAME_EMPTY(HttpStatus.BAD_REQUEST, "LOGIN_4002", "닉네임을 입력해주세요."),
+    LOGIN_PASSWORD_EMPTY(HttpStatus.BAD_REQUEST, "LOGIN_4002", "비밀번호를 입력해주세요."),
 
     //토큰 관련 에러
     TOKEN_INVALID(HttpStatus.UNAUTHORIZED, "TOKEN_4001", "토큰이 유효하지 않습니다."),
