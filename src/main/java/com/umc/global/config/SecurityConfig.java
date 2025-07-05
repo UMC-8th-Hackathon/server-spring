@@ -1,4 +1,4 @@
-package com.umc.auth.config;
+package com.umc.global.config;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
