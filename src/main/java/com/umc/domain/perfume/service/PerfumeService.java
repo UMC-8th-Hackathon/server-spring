@@ -3,8 +3,6 @@ package com.umc.domain.perfume.service;
 import com.umc.domain.perfume.dto.PerfumeResponseDto;
 import com.umc.domain.perfume.entity.Perfume;
 import com.umc.domain.perfume.entity.SourceType;
-import java.util.List;
-import java.util.ArrayList;
 import com.umc.domain.perfume.repository.PerfumeRepository;
 import com.umc.domain.user.entity.User;
 import com.umc.domain.user.repository.UserRepository;
@@ -185,136 +183,35 @@ public class PerfumeService {
             throw new RuntimeException("추천 API는 RECOMMEND_AUDIO 또는 RECOMMEND_IMAGE 타입만 사용 가능합니다.");
         }
         
-        // 추천 로직: 추천 타입에 해당하는 향수들을 가져옴
-        List<Perfume> recentPerfumes = perfumeRepository.findTop10BySourceTypeOrderByCreatedAtDesc(sourceType);
+        // DB에서 추천 타입에 해당하는 향수들을 최대 10개 조회
+        List<Perfume> recommendationPerfumes = perfumeRepository.findTop10BySourceTypeOrderByCreatedAtDesc(sourceType);
         
-        if (recentPerfumes.isEmpty()) {
-            // 추천할 향수가 없으면 기본 향수들 생성
-            return createDefaultRecommendations(sourceType);
-        }
-        
-        // 향수들을 DTO로 변환
-        List<PerfumeResponseDto> recommendations = recentPerfumes.stream()
-                .map(PerfumeResponseDto::from)
+        // 향수들을 DTO로 변환하되, sourceType을 클라이언트용으로 변환
+        List<PerfumeResponseDto> recommendations = recommendationPerfumes.stream()
+                .map(perfume -> {
+                    PerfumeResponseDto dto = PerfumeResponseDto.from(perfume);
+                    // DB의 RECOMMEND_AUDIO -> 클라이언트의 AUDIO로 변환
+                    // DB의 RECOMMEND_IMAGE -> 클라이언트의 IMAGE로 변환
+                    return dto.withClientSourceType(convertToClientSourceType(perfume.getSourceType()));
+                })
                 .toList();
         
-        log.info("향수 추천 완료 - 타입: {}, 추천 개수: {}", sourceType, recommendations.size());
+        log.info("향수 추천 완료 - DB 타입: {}, 클라이언트 타입: {}, 추천 개수: {}", 
+                sourceType, convertToClientSourceType(sourceType), recommendations.size());
         
         return recommendations;
     }
-
+    
     /**
-     * 기본 추천 향수들 생성 (추천할 향수가 없을 때) - 최대 10개
+     * DB용 SourceType을 클라이언트용으로 변환
      */
-    private List<PerfumeResponseDto> createDefaultRecommendations(SourceType sourceType) {
-        List<PerfumeResponseDto> defaultRecommendations = new ArrayList<>();
-        
-        if (sourceType == SourceType.RECOMMEND_AUDIO) {
-            // 추천 오디오 타입 기본 향수들
-            String[] audioDescriptions = {
-                """
-                {
-                    "type": "AUDIO",
-                    "top": ["레몬", "라임", "베르가못"],
-                    "middle": ["라벤더", "로즈마리", "민트"],
-                    "base": ["머스크", "우드", "앰버"],
-                    "interpretation": "신선하고 상쾌한 시트러스 향이 중간의 허브 향과 조화를 이루며, 따뜻한 베이스 노트가 안정감을 더합니다.",
-                    "summary": "상쾌하고 활기찬 향수",
-                    "title": "상쾌한 아침 : 활기찬 에너지",
-                    "fileDescription": "오디오 파일에서 추출한 상쾌하고 활기찬 분위기를 담은 향수입니다."
-                }
-                """,
-                """
-                {
-                    "type": "AUDIO",
-                    "top": ["오렌지", "만다린", "그레이프프루트"],
-                    "middle": ["재스민", "네롤리", "베르가못"],
-                    "base": ["샌달우드", "파츌리", "머스크"],
-                    "interpretation": "달콤하고 상쾌한 시트러스 향이 중간의 플로럴 향과 조화를 이루며, 깊이 있는 우디 베이스가 우아함을 더합니다.",
-                    "summary": "달콤하고 상쾌한 향수",
-                    "title": "달콤한 오후 : 상쾌한 기분",
-                    "fileDescription": "오디오 파일에서 추출한 달콤하고 상쾌한 분위기를 담은 향수입니다."
-                }
-                """,
-                """
-                {
-                    "type": "AUDIO",
-                    "top": ["베르가못", "핑크 페퍼", "카다몬"],
-                    "middle": ["로즈", "피오니", "일랑일랑"],
-                    "base": ["앰버", "바닐라", "머스크"],
-                    "interpretation": "스파이시한 향이 중간의 로맨틱한 플로럴 향과 조화를 이루며, 달콤한 베이스 노트가 매력적입니다.",
-                    "summary": "스파이시하고 로맨틱한 향수",
-                    "title": "스파이시한 저녁 : 매력적인 분위기",
-                    "fileDescription": "오디오 파일에서 추출한 스파이시하고 로맨틱한 분위기를 담은 향수입니다."
-                }
-                """
-            };
-            
-            for (int i = 0; i < audioDescriptions.length; i++) {
-                Perfume defaultPerfume = Perfume.builder()
-                        .sourceType(sourceType)
-                        .description(audioDescriptions[i])
-                        .url("/virtual/recommendation-audio-" + (i + 1) + ".json")
-                        .user(null) // 추천 향수는 사용자와 연결되지 않음
-                        .build();
-                
-                defaultRecommendations.add(PerfumeResponseDto.from(defaultPerfume));
-            }
-        } else {
-            // 추천 이미지 타입 기본 향수들
-            String[] imageDescriptions = {
-                """
-                {
-                    "type": "IMAGE",
-                    "top": ["자스민", "피오니", "로즈"],
-                    "middle": ["바닐라", "일랑일랑", "오키드"],
-                    "base": ["샌달우드", "파츌리", "머스크"],
-                    "interpretation": "우아하고 로맨틱한 플로럴 향이 중간의 달콤한 향과 조화를 이루며, 깊이 있는 우디 베이스가 신비로움을 더합니다.",
-                    "summary": "우아하고 로맨틱한 향수",
-                    "title": "로맨틱한 저녁 : 우아한 분위기",
-                    "fileDescription": "이미지에서 추출한 우아하고 로맨틱한 분위기를 담은 향수입니다."
-                }
-                """,
-                """
-                {
-                    "type": "IMAGE",
-                    "top": ["라벤더", "로즈마리", "세이지"],
-                    "middle": ["재스민", "네롤리", "카모마일"],
-                    "base": ["머스크", "우드", "앰버"],
-                    "interpretation": "차분하고 평화로운 허브 향이 중간의 부드러운 플로럴 향과 조화를 이루며, 따뜻한 베이스 노트가 안정감을 더합니다.",
-                    "summary": "차분하고 평화로운 향수",
-                    "title": "평화로운 아침 : 차분한 분위기",
-                    "fileDescription": "이미지에서 추출한 차분하고 평화로운 분위기를 담은 향수입니다."
-                }
-                """,
-                """
-                {
-                    "type": "IMAGE",
-                    "top": ["베르가못", "핑크 페퍼", "카다몬"],
-                    "middle": ["로즈", "피오니", "일랑일랑"],
-                    "base": ["앰버", "바닐라", "머스크"],
-                    "interpretation": "스파이시하고 매력적인 향이 중간의 로맨틱한 플로럴 향과 조화를 이루며, 달콤한 베이스 노트가 매력적입니다.",
-                    "summary": "스파이시하고 매력적인 향수",
-                    "title": "매력적인 밤 : 스파이시한 분위기",
-                    "fileDescription": "이미지에서 추출한 스파이시하고 매력적인 분위기를 담은 향수입니다."
-                }
-                """
-            };
-            
-            for (int i = 0; i < imageDescriptions.length; i++) {
-                Perfume defaultPerfume = Perfume.builder()
-                        .sourceType(sourceType)
-                        .description(imageDescriptions[i])
-                        .url("/virtual/recommendation-image-" + (i + 1) + ".json")
-                        .user(null) // 추천 향수는 사용자와 연결되지 않음
-                        .build();
-                
-                defaultRecommendations.add(PerfumeResponseDto.from(defaultPerfume));
-            }
-        }
-        
-        log.info("기본 추천 향수들 생성 - 타입: {}, 개수: {}", sourceType, defaultRecommendations.size());
-        
-        return defaultRecommendations;
+    private SourceType convertToClientSourceType(SourceType dbSourceType) {
+        return switch (dbSourceType) {
+            case RECOMMEND_AUDIO -> SourceType.AUDIO;
+            case RECOMMEND_IMAGE -> SourceType.IMAGE;
+            default -> dbSourceType;
+        };
     }
+
+
 }

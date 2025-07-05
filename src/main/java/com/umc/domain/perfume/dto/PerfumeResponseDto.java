@@ -70,4 +70,19 @@ public class PerfumeResponseDto {
             throw new RuntimeException("향수 설명 JSON 파싱에 실패했습니다: " + e.getMessage());
         }
     }
+    
+    /**
+     * 클라이언트용 sourceType으로 새 객체 생성 (추천 API에서 사용)
+     */
+    public PerfumeResponseDto withClientSourceType(SourceType clientSourceType) {
+        return PerfumeResponseDto.builder()
+                .id(this.id)
+                .sourceType(clientSourceType)
+                .description(this.description)
+                .url(this.url)
+                .user(this.user)
+                .createdAt(this.createdAt)
+                .updatedAt(this.updatedAt)
+                .build();
+    }
 }
