@@ -41,7 +41,7 @@ dependencies {
 	
 	// MariaDB 드라이버 (프로덕션용)
 	runtimeOnly 'org.mariadb.jdbc:mariadb-java-client'
-	
+	runtimeOnly 'com.mysql:mysql-connector-j'
 	compileOnly 'org.projectlombok:lombok'
 	annotationProcessor 'org.projectlombok:lombok'
 	
