@@ -21,7 +21,7 @@ public class JwtProvider {
     @Value("${jwt.secret}")
     private String secretKey;
 
-    private final long expirationMillis = 1000 * 60 * 60; // 1시간
+    private final long expirationMillis = 1000L * 60 * 60 * 24 * 30; // 30일
 
     public String generateToken(User user) {
         Date now = new Date();

@@ -1,15 +1,19 @@
 package com.umc.domain.review.controller;
 
 import com.umc.auth.Jwt.JwtProvider;
+import com.umc.auth.util.JwtUtil;
 import com.umc.common.response.ApiResponse;
 import com.umc.domain.review.dto.ReviewRequestDTO;
 import com.umc.domain.review.dto.ReviewResponseDTO;
 import com.umc.domain.review.service.ReviewService;
+import com.umc.domain.user.entity.User;
 import com.umc.global.exception.ErrorCode;
-import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.JwtException;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.HttpStatus;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -18,45 +22,57 @@ import java.util.List;
 @RestController
 @RequestMapping("/api/reviews")
 @RequiredArgsConstructor
+@Slf4j
 public class ReviewController {
 
     private final ReviewService reviewService;
-    private final JwtProvider jwtTokenProvider;
+    private final JwtUtil jwtUtil;
 
     @PostMapping("/{perfumeId}")
+    @Operation(
+            summary = "리뷰 생성",
+            description = "특정 향수에 대한 리뷰를 작성합니다.",
+            security = @SecurityRequirement(name = "bearerAuth")
+    )
     public ResponseEntity<ApiResponse<ReviewResponseDTO.CreateReviewReponseDTO>> createReview(
             @PathVariable Long perfumeId,
-            @RequestHeader("Authorization") String token,
-            @RequestBody ReviewRequestDTO.CreatReviewRequestDTO request
+            @RequestBody ReviewRequestDTO.CreateReviewRequestDTO request,
+            HttpServletRequest httpRequest
     ) {
+        String authorization = httpRequest.getHeader("Authorization");
+        log.info("리뷰 생성 요청 - perfumeId: {}, Authorization: {}", perfumeId, authorization);
 
-        /*
-        // 1. 향수 존재 여부 확인 -> 향수 엔티티 추가시 다시
-        if (!perfumeRepository.existsById(perfumeId)) {
-            return ResponseEntity.status(ErrorCode.PERFUME_NOT_FOUND.getStatus()).build();
-        }*/
-
-        // 2. JWT 유효성 검사 및 사용자 ID 추출
-        String parsedToken = token.replace("Bearer ", "");
-        Long userId;
-        try {
-            userId = jwtTokenProvider.getUserId(parsedToken);
-        } catch (JwtException | IllegalArgumentException e) {
-            return ResponseEntity.status(ErrorCode.TOKEN_INVALID.getStatus()).build();
+        if (authorization == null || authorization.trim().isEmpty()) {
+            throw new RuntimeException("Authorization 헤더가 없습니다. 헤더를 확인해주세요.");
         }
 
-        ReviewResponseDTO.CreateReviewReponseDTO result = reviewService.createReview(perfumeId, userId, request);
-
+        User user = jwtUtil.getUserFromHeader(authorization);
+        ReviewResponseDTO.CreateReviewReponseDTO result = reviewService.createReview(perfumeId, user.getId(), request);
         return ResponseEntity.ok(ApiResponse.success("리뷰가 성공적으로 등록되었습니다.", result));
     }
 
+    @GetMapping("/me")
+    @Operation(summary = "내가 작성한 리뷰 목록 조회", security = @SecurityRequirement(name = "bearerAuth"))
+    public ResponseEntity<ApiResponse<List<ReviewResponseDTO.MyReviewDTO>>> getMyReviews(HttpServletRequest httpRequest) {
+        String authorization = httpRequest.getHeader("Authorization");
+        log.info("내 리뷰 조회 요청 - Authorization: {}", authorization);
+
+        if (authorization == null || authorization.trim().isEmpty()) {
+            throw new RuntimeException("Authorization 헤더가 없습니다. 헤더를 확인해주세요.");
+        }
+
+        User user = jwtUtil.getUserFromHeader(authorization);
+        List<ReviewResponseDTO.MyReviewDTO> result = reviewService.getMyReviews(user.getId());
+        return ResponseEntity.ok(ApiResponse.success("내가 작성한 리뷰 목록 조회 성공", result));
+    }
+
     @GetMapping("/{perfumeId}")
+    @Operation(summary = "특정 향수 리뷰 목록 조회")
     public ResponseEntity<ApiResponse<List<ReviewResponseDTO.ReviewSimpleDTO>>> getReviewsByPerfume(
             @PathVariable Long perfumeId) {
+
+        log.info("향수 리뷰 목록 조회 요청 - perfumeId: {}", perfumeId);
         List<ReviewResponseDTO.ReviewSimpleDTO> result = reviewService.getReviewsByPerfumeId(perfumeId);
-
-        //에러처리 나중에 추가 예정
-
         return ResponseEntity.ok(ApiResponse.success("리뷰 목록 조회 성공", result));
     }
 }

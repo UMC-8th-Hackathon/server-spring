@@ -1,6 +1,7 @@
 package com.umc.domain.perfume.entity;
 
 import com.umc.common.entity.BaseEntity;
+import com.umc.domain.user.entity.User;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
@@ -20,6 +21,10 @@ public class Perfume extends BaseEntity {
 
     @Column(name = "url", nullable = false)
     private String url; // 소스 URL (오디오/이미지 파일 경로)
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "user_id", nullable = false)
+    private User user; // 향수를 생성한 사용자
 
     // BaseEntity에서 이미 id, createdAt, updatedAt을 상속받음
 }
