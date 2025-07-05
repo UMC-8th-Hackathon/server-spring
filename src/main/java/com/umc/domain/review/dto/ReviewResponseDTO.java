@@ -29,4 +29,24 @@ public class ReviewResponseDTO {
         private Long id;
         private String nickname;
     }
+
+    @Builder
+    @Getter
+    @NoArgsConstructor
+    @AllArgsConstructor
+    public static class MyReviewDTO {
+        private Long id;
+        private PerfumeDTO perfume;
+        private String description;
+        private LocalDateTime createdAt;
+
+        @Builder
+        @Getter
+        @NoArgsConstructor
+        @AllArgsConstructor
+        public static class PerfumeDTO {
+            private Long id;
+            private String name;
+        }
+    }
 }

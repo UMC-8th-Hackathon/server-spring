@@ -30,4 +30,18 @@ public class ReviewConverter {
                 .updatedAt(review.getUpdatedAt())
                 .build();
     }
+
+    public static ReviewResponseDTO.MyReviewDTO toMyReviewDTO(Review review, PerfumeDTO perfume) {
+        return ReviewResponseDTO.MyReviewDTO.builder()
+                .id(review.getId())
+                .description(review.getDescription())
+                .createdAt(review.getCreatedAt())
+                .perfume(
+                        ReviewResponseDTO.MyReviewDTO.PerfumeDTO.builder()
+                                .id(perfume.getId())
+                                .name(perfume.getName())
+                                .build()
+                )
+                .build();
+    }
 }
