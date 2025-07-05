@@ -30,4 +30,14 @@ public class ReviewConverter {
                 .updatedAt(review.getUpdatedAt())
                 .build();
     }
+
+    public static ReviewResponseDTO.ReviewSimpleDTO toReviewSimpleDTO(Review review, String nickname) {
+        return ReviewResponseDTO.ReviewSimpleDTO.builder()
+                .id(review.getId())
+                .description(review.getDescription())
+                .user(new ReviewResponseDTO.UserDTO(review.getUserId(), nickname))
+                .createdAt(review.getCreatedAt())
+                .updatedAt(review.getUpdatedAt())
+                .build();
+    }
 }
