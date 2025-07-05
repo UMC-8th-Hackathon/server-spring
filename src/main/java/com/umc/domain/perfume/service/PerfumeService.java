@@ -10,10 +10,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.UUID;
 
 @Service
@@ -25,18 +21,16 @@ public class PerfumeService {
     private final PerfumeRepository perfumeRepository;
     private final PerfumeGptService perfumeGptService;
 
-    private static final String UPLOAD_DIR = "uploads/";
-
     /**
      * 향수 생성
      */
     public PerfumeResponseDto createPerfume(SourceType sourceType, MultipartFile file) {
         try {
-            // 1. 파일 업로드 및 URL 생성
-            String fileUrl = uploadFile(file);
+            // 1. 가상 URL 생성 (실제 파일 저장 없음)
+            String virtualFileUrl = generateVirtualFileUrl(file);
             
             // 2. GPT를 통한 향수 정보 생성 (파일 직접 전달)
-            Perfume perfume = perfumeGptService.generatePerfume(sourceType, fileUrl, file);
+            Perfume perfume = perfumeGptService.generatePerfume(sourceType, virtualFileUrl, file);
             
             // 3. 데이터베이스에 저장
             Perfume savedPerfume = perfumeRepository.save(perfume);
@@ -51,26 +45,17 @@ public class PerfumeService {
     }
 
     /**
-     * 파일 업로드
+     * 가상 파일 URL 생성 (실제 파일 저장 없음)
      */
-    private String uploadFile(MultipartFile file) throws IOException {
-        // 업로드 디렉토리 생성
-        Path uploadPath = Paths.get(UPLOAD_DIR);
-        if (!Files.exists(uploadPath)) {
-            Files.createDirectories(uploadPath);
-        }
-
+    private String generateVirtualFileUrl(MultipartFile file) {
         // 파일명 생성 (UUID + 원본 확장자)
         String originalFilename = file.getOriginalFilename();
-        String extension = originalFilename.substring(originalFilename.lastIndexOf("."));
+        String extension = originalFilename != null ? 
+            originalFilename.substring(originalFilename.lastIndexOf(".")) : ".tmp";
         String filename = UUID.randomUUID().toString() + extension;
         
-        // 파일 저장
-        Path filePath = uploadPath.resolve(filename);
-        Files.copy(file.getInputStream(), filePath);
-        
-        // URL 반환 (실제 환경에서는 CDN URL로 변경)
-        return "/uploads/" + filename;
+        // 가상 URL 반환 (실제 파일 저장 없음)
+        return "/virtual/" + filename;
     }
 
     /**
