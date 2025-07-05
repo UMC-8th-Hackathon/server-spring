@@ -1,11 +1,15 @@
 package com.umc.domain.shop.service;
 
+import com.umc.domain.shop.dto.ShopResponseDto;
 import com.umc.domain.shop.entity.Shop;
 import com.umc.domain.shop.repository.ShopRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.util.Comparator;
 import java.util.List;
+
+import static java.awt.geom.Point2D.distance;
 
 @Service
 @RequiredArgsConstructor
@@ -14,26 +18,25 @@ public class ShopServiceImpl implements ShopService {
     private final ShopRepository shopRepository;
 
     @Override
-    public List<Shop> findNearbyShops(double centerLat, double centerLng, double radiusKm, int limit) {
-        // 반경 → 위도/경도 범위 변환
-        double delta = radiusKm / 111.0;
+    public List<ShopResponseDto> findNearbyShops(double latitude, double longitude) {
+        // 위도 1도 ≈ 111km / 경도는 위도에 따라 다름 (서울 기준 대략 1도 ≈ 88km)
+        // 대략 20km 반경을 위도/경도 기준으로 환산하면:
+        double latRange = 4.0; // 20km / 111km ≈ 0.18
+        double lngRange = 4.0; // 20km / 88km ≈ 0.23
 
-        double minLat = centerLat - delta;
-        double maxLat = centerLat + delta;
-        double minLng = centerLng - delta;
-        double maxLng = centerLng + delta;
+        int limit = 5;
 
-        System.out.println("lat: " + centerLat);
-        System.out.println("lng: " + centerLng);
-
-
-
-        // 범위 내 가게 조회
         List<Shop> shops = shopRepository.findByLatitudeBetweenAndLongitudeBetween(
-                minLat, maxLat, minLng, maxLng
+                latitude - latRange, latitude + latRange,
+                longitude - lngRange, longitude + lngRange
         );
 
-        // limit 개수만 자르기
-        return shops.size() > limit ? shops.subList(0, limit) : shops;
+        return shops.stream()
+                .sorted(Comparator.comparingDouble(s ->
+                        distance(latitude, longitude, s.getLatitude(), s.getLongitude())
+                ))
+                .limit(limit)
+                .map(ShopResponseDto::from)
+                .toList();
     }
 }

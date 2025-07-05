@@ -11,15 +11,16 @@ spring:
     username: root
     password: cjswoshckd44!
 
-  # JPA/Hibernate 설정
   jpa:
     hibernate:
-      ddl-auto: create-drop
+      ddl-auto: update
     show-sql: true
     properties:
       hibernate:
         format_sql: true
-        dialect: org.hibernate.dialect.H2Dialect
+        dialect: org.hibernate.dialect.MySQLDialect
+        id:
+          new_generator_mappings: false  # <-- 이거 추가
 
   # H2 콘솔 설정 (개발용)
   h2:
