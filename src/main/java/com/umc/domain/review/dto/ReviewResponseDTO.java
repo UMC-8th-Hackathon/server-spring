@@ -29,4 +29,16 @@ public class ReviewResponseDTO {
         private Long id;
         private String nickname;
     }
+
+    @Builder
+    @Getter
+    @NoArgsConstructor
+    @AllArgsConstructor
+    public static class ReviewSimpleDTO { // 특정 향수의 리뷰 목록 조회
+        private Long id;
+        private String description;
+        private UserDTO user;
+        private LocalDateTime createdAt;
+        private LocalDateTime updatedAt;
+    }
 }

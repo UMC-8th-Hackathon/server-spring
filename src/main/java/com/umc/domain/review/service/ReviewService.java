@@ -11,6 +11,9 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
+import java.util.stream.Collectors;
+
 @Service
 @RequiredArgsConstructor
 public class ReviewService {
@@ -27,5 +30,17 @@ public class ReviewService {
         Review saved = reviewRepository.save(review);
 
         return ReviewConverter.toCreateDTO(saved, user);
+    }
+
+    public List<ReviewResponseDTO.ReviewSimpleDTO> getReviewsByPerfumeId(Long perfumeId) {
+        List<Review> reviews = reviewRepository.findByPerfumeIdOrderByCreatedAtDesc(perfumeId);
+
+        return reviews.stream().map(review -> {
+            String nickname = userRepository.findById(review.getUserId())
+                    .map(User::getNickname)
+                    .orElse("알 수 없음");
+
+            return ReviewConverter.toReviewSimpleDTO(review, nickname);
+        }).collect(Collectors.toList());
     }
 }
