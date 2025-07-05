@@ -3,6 +3,8 @@ package com.umc.domain.shop.controller;
 import com.umc.common.response.ApiResponse;
 import com.umc.domain.shop.dto.ShopResponseDto;
 import com.umc.domain.shop.service.ShopService;
+import com.umc.global.config.SwaggerConfig.ApiErrorExamples;
+import com.umc.global.exception.ErrorCode;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -34,15 +36,11 @@ public class ShopController {
             responseCode = "200",
             description = "근처 매장 조회 성공",
             content = @Content(schema = @Schema(implementation = ApiResponse.class))
-        ),
-        @io.swagger.v3.oas.annotations.responses.ApiResponse(
-            responseCode = "400",
-            description = "잘못된 요청 (잘못된 위도/경도 값)"
-        ),
-        @io.swagger.v3.oas.annotations.responses.ApiResponse(
-            responseCode = "500",
-            description = "서버 오류"
         )
+    })
+    @ApiErrorExamples({
+        ErrorCode.SHOP_INVALID_COORDINATES,
+        ErrorCode.SHOP_SEARCH_FAILED
     })
     public ApiResponse<List<ShopResponseDto>> getNearbyShops(
             @Parameter(description = "위도 (latitude)", required = true, example = "37.5665")
@@ -51,18 +49,12 @@ public class ShopController {
             @Parameter(description = "경도 (longitude)", required = true, example = "126.9780")
             @RequestParam double lng
     ) {
-        try {
-            log.info("근처 매장 조회 요청 - lat: {}, lng: {}", lat, lng);
-            
-            List<ShopResponseDto> response = shopService.findNearbyShops(lat, lng);
-            
-            log.info("근처 매장 조회 성공 - 매장 개수: {}", response.size());
-            
-            return ApiResponse.success("근처 매장이 성공적으로 조회되었습니다.", response);
-            
-        } catch (Exception e) {
-            log.error("근처 매장 조회 실패 - 오류: {}", e.getMessage());
-            throw new RuntimeException("근처 매장 조회 중 오류가 발생했습니다.");
-        }
+        log.info("근처 매장 조회 요청 - lat: {}, lng: {}", lat, lng);
+        
+        List<ShopResponseDto> response = shopService.findNearbyShops(lat, lng);
+        
+        log.info("근처 매장 조회 성공 - 매장 개수: {}", response.size());
+        
+        return ApiResponse.success("근처 매장이 성공적으로 조회되었습니다.", response);
     }
 }
