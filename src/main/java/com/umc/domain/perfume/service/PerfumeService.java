@@ -40,17 +40,27 @@ public class PerfumeService {
             // 1. 파일 유효성 검증
             validateFile(file, sourceType);
             
-            // 2. 가상 URL 생성 (실제 파일 저장 없음)
-            String virtualFileUrl = generateVirtualFileUrl(file);
+            // 2. GPT를 통한 향수 정보 생성 (임시 URL 사용)
+            String tempUrl = "/temp/" + UUID.randomUUID().toString();
+            Perfume perfume = perfumeGptService.generatePerfume(sourceType, tempUrl, file);
             
-            // 3. GPT를 통한 향수 정보 생성 (파일 직접 전달)
-            Perfume perfume = perfumeGptService.generatePerfume(sourceType, virtualFileUrl, file);
-            
-            // 4. 검증된 사용자 정보 설정
+            // 3. 검증된 사용자 정보 설정
             perfume.setUser(existingUser);
             
-            // 5. 데이터베이스에 저장
+            // 4. 데이터베이스에 저장 (ID 생성을 위해)
             Perfume savedPerfume = perfumeRepository.save(perfume);
+            
+            // 5. 파일을 구글 드라이브에 업로드하고 URL 업데이트
+            try {
+                perfumeGptService.uploadFileAndUpdateUrl(savedPerfume, file);
+                log.info("파일 업로드 및 URL 업데이트 완료 - 향수 ID: {}", savedPerfume.getId());
+            } catch (Exception e) {
+                log.error("파일 업로드 실패 - 향수 ID: {}, 오류: {}", savedPerfume.getId(), e.getMessage());
+                // 파일 업로드 실패해도 향수는 생성됨 (임시 URL 유지)
+            }
+            
+            // 6. 업데이트된 URL로 데이터베이스 저장
+            savedPerfume = perfumeRepository.save(savedPerfume);
             
             log.info("향수 생성 완료 - ID: {}, 사용자: {}, 타입: {}", 
                     savedPerfume.getId(), existingUser.getNickname(), sourceType);
@@ -101,41 +111,7 @@ public class PerfumeService {
                 contentType);
     }
 
-    /**
-     * 가상 파일 URL 생성 (실제 파일 저장 없음)
-     */
-    private String generateVirtualFileUrl(MultipartFile file) {
-        try {
-            // 파일명 생성 (UUID + 원본 확장자)
-            String originalFilename = file.getOriginalFilename();
-            String extension = "";
-            
-            if (originalFilename != null && originalFilename.contains(".")) {
-                extension = originalFilename.substring(originalFilename.lastIndexOf("."));
-            } else {
-                // 파일 형식에 따른 기본 확장자 설정
-                String contentType = file.getContentType();
-                if (contentType != null) {
-                    if (contentType.startsWith("audio/")) {
-                        extension = ".mp3";
-                    } else if (contentType.startsWith("image/")) {
-                        extension = ".jpg";
-                    }
-                } else {
-                    extension = ".tmp";
-                }
-            }
-            
-            String filename = UUID.randomUUID().toString() + extension;
-            
-            // 가상 URL 반환 (실제 파일 저장 없음)
-            return "/virtual/" + filename;
-            
-        } catch (Exception e) {
-            log.warn("파일 URL 생성 중 오류 발생: {}", e.getMessage());
-            return "/virtual/" + UUID.randomUUID().toString() + ".tmp";
-        }
-    }
+
 
     /**
      * 향수 조회

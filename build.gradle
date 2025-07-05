@@ -65,6 +65,11 @@ dependencies {
 	// Jackson JSR310 모듈 (LocalDateTime 직렬화 지원)
 	implementation 'com.fasterxml.jackson.datatype:jackson-datatype-jsr310'
 	
+	// Google Drive API 의존성
+	implementation 'com.google.apis:google-api-services-drive:v3-rev20220815-2.0.0'
+	implementation 'com.google.auth:google-auth-library-oauth2-http:1.19.0'
+	implementation 'com.google.http-client:google-http-client-jackson2:1.43.3'
+	
 }
 
 tasks.named('test') {
