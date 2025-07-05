@@ -12,9 +12,9 @@
 
     <!-- 파일 출력 (색깔 없음 그래야 저장 되는 로그 파일에 색깔 안 들어감) -->
     <appender name="FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
-        <file>logs/divary.log</file>
+        <file>logs/umc-hackathon.log</file>
         <rollingPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedRollingPolicy">
-            <fileNamePattern>logs/divary.%d{yyyy-MM-dd}.%i.log</fileNamePattern>
+            <fileNamePattern>logs/umc-hackathon.%d{yyyy-MM-dd}.%i.log</fileNamePattern>
             <maxFileSize>100MB</maxFileSize>
             <maxHistory>30</maxHistory>
             <totalSizeCap>3GB</totalSizeCap>
@@ -31,8 +31,8 @@
             <appender-ref ref="FILE"/>
         </root>
         
-        <!-- 내 애플리케이션만 DEBUG (com.divary 패키지 내 로그만 DEBUG 로 출력 한다는 의미) -->
-        <logger name="com.divary" level="DEBUG"/>
+        <!-- 내 애플리케이션만 DEBUG (com.umc 패키지 내 로그만 DEBUG 로 출력 한다는 의미) -->
+        <logger name="com.umc" level="DEBUG"/>
         
         <!-- SQL 로그만 -->
         <logger name="org.hibernate.SQL" level="DEBUG"/>
@@ -50,7 +50,7 @@
         <root level="INFO">
             <appender-ref ref="FILE"/>
         </root>
-        <logger name="com.divary" level="INFO"/>
+        <logger name="com.umc" level="INFO"/>
         <logger name="org.springframework.web" level="WARN"/>
         <logger name="com.zaxxer.hikari" level="WARN"/>
     </springProfile>

@@ -249,8 +249,8 @@ public class SwaggerConfig {
     public OpenAPI openAPI() {
         return new OpenAPI()
                 .info(new Info()
-                        .title("Divary API")
-                        .description("다이빙 서포트 앱 Divary의 REST API 문서")
+                        .title("UMC Hackathon API")
+.description("UMC 8기 해커톤 REST API 문서")
                         .version("v1.0.0"));
     }
 }
@@ -324,7 +324,7 @@ public class SwaggerConfig {
 ### H2 콘솔 접근
 
 - URL: `http://localhost:8080/h2-console`
-- JDBC URL: `jdbc:h2:mem:divary`
+- JDBC URL: `jdbc:h2:mem:umc-hackathon`
 - Username: `sa`
 - Password: (비어있음)
 
@@ -358,7 +358,7 @@ public class SwaggerConfig {
 #### 로그 출력 대상
 
 - **콘솔**: 개발 시 실시간 로그 확인 (색상 지원)
-- **파일**: `logs/divary.log`에 로그 저장 (일별, 크기별 롤링)
+- **파일**: `logs/umc-hackathon.log`에 로그 저장 (일별, 크기별 롤링)
 
 #### 로그 패턴
 
@@ -377,7 +377,7 @@ public class SwaggerConfig {
 #### 개발 환경 (dev)
 
 - **루트 레벨**: WARN
-- **애플리케이션 로그**: DEBUG (com.divary 패키지)
+- **애플리케이션 로그**: DEBUG (com.umc 패키지)
 - **SQL 로그**: DEBUG (쿼리 및 파라미터)
 - **Spring 프레임워크 로그**: INFO
 
@@ -393,7 +393,7 @@ public class SwaggerConfig {
 - **최대 파일 크기**: 100MB
 - **보관 기간**: 30일
 - **총 용량 제한**: 3GB
-- **파일명 패턴**: `divary.yyyy-MM-dd.i.log`
+- **파일명 패턴**: `umc-hackathon.yyyy-MM-dd.i.log`
 
 ## 환경 설정
 
