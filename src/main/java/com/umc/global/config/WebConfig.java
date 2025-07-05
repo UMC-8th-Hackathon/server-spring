@@ -6,7 +6,7 @@ import org.springframework.lang.NonNull;
 import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
-import com.divary.global.intercepter.LoggingInterceptor;
+import com.umc.global.intercepter.LoggingInterceptor;
 
 // Interceptor를 Spring MVC에 등록, 특정 URL 경로에 대해 적용
 @Configuration

@@ -1,6 +1,6 @@
 package com.umc.global.config;
 
-import com.divary.global.exception.ErrorCode;
+import com.umc.global.exception.ErrorCode;
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.Operation;
 import io.swagger.v3.oas.models.examples.Example;

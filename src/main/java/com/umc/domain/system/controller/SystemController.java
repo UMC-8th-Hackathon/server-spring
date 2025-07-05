@@ -1,8 +1,8 @@
 package com.umc.domain.system.controller;
 
-import com.divary.common.response.ApiResponse;
-import com.divary.global.config.SwaggerConfig.ApiErrorExamples;
-import com.divary.global.exception.ErrorCode;
+import com.umc.common.response.ApiResponse;
+import com.umc.global.config.SwaggerConfig.ApiErrorExamples;
+import com.umc.global.exception.ErrorCode;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
