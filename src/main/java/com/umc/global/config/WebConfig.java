@@ -1,8 +1,11 @@
 package com.umc.global.config;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
+import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.lang.NonNull;
+import org.springframework.web.client.RestTemplate;
 import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
@@ -22,5 +25,15 @@ public class WebConfig implements WebMvcConfigurer {
                 .addPathPatterns("/**")
                 // 인터셉터가 실행되지 않을 경로를 설정하는 필터
                 .excludePathPatterns("/h2-console/**", "/swagger-ui/**", "/v3/api-docs/**");
+    }
+
+    @Bean
+    public RestTemplate restTemplate() {
+        return new RestTemplate();
+    }
+
+    @Bean
+    public ObjectMapper objectMapper() {
+        return new ObjectMapper();
     }
 } 
