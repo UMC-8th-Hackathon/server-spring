@@ -2,9 +2,6 @@ spring:
   application:
     name: umc-hackathon-spring
 
-  profiles:
-    active: dev
-
   # 데이터베이스 설정 (H2 인메모리)
   datasource:
     url: jdbc:mysql://localhost:3306/hack
@@ -36,8 +33,3 @@ spring:
 
 server:
   port: 8080
-
-# 로깅 설정
-logging:
-  level:
-    com.umc: DEBUG

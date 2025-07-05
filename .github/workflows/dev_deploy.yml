@@ -33,7 +33,7 @@ jobs:
       - name: Build with Gradle
         run: ./gradlew build
 
-      - name: Compress JAR with tar.gz # jar 파일 압축
+      - name: Compress JAR with tar.gz
         run: |
           mkdir -p package
           cp build/libs/*.jar package/
@@ -44,7 +44,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: umc-hackathon-artifact
-          path: umc-hackathon-app.tar.gz # 압축된 tar.gz 파일만 업로드
+          path: umc-hackathon-app.tar.gz
 
   deploy:
     needs: build
@@ -67,24 +67,99 @@ jobs:
           echo "$EC2_SSH_KEY" > private_key.pem
           chmod 600 private_key.pem
 
-                    tar_file=deploy-package/umc-hackathon-app.tar.gz
+          tar_file=deploy-package/umc-hackathon-app.tar.gz
 
-          # tar.gz 파일을 EC2로 전송
+          # JAR 파일을 EC2로 전송
           scp -i private_key.pem -o StrictHostKeyChecking=no "$tar_file" $EC2_USERNAME@$EC2_HOST:/home/$EC2_USERNAME/umc-hackathon-app.tar.gz
 
-          # EC2에서 압축 해제 후 실행
-          ssh -i private_key.pem -o StrictHostKeyChecking=no $EC2_USERNAME@$EC2_HOST << EOF
-            set -e
-            cd /home/ec2-user
+          # EC2에서 기존 프로세스 종료 후 새 애플리케이션 실행
+          ssh -i private_key.pem -o StrictHostKeyChecking=no $EC2_USERNAME@$EC2_HOST << 'EOF'
+            # 기존 Java 프로세스 종료
+            echo "=== Stopping existing application ==="
+            pkill -f "umc-hackathon" || echo "No existing process found"
+            pkill -f "java.*jar" || echo "No Java jar processes found"
+            sleep 5
 
+            # 애플리케이션 디렉토리 준비
+            cd /home/ec2-user
             rm -rf umc-hackathon-app
-            mkdir -p umc-hackathon-app
+            mkdir -p umc-hackathon-app logs
             tar -xzf umc-hackathon-app.tar.gz -C umc-hackathon-app
 
-            # systemd 재시작
-            sudo systemctl daemon-reload
-            sudo systemctl restart umc-hackathon
-            sudo systemctl is-active umc-hackathon
+            # Java 버전 및 JAR 파일 확인
+            echo "=== Environment Check ==="
+            java -version
+            echo "JAR files:"
+            ls -la umc-hackathon-app/
+            
+            # 정확한 JAR 파일 찾기 (plain이 아닌 실행 가능한 JAR)
+            EXECUTABLE_JAR=$(ls umc-hackathon-app/*.jar | grep -v plain | head -1)
+            echo "Using JAR: $EXECUTABLE_JAR"
+
+            # JAR 파일이 실행 가능한지 확인
+            if [ ! -f "$EXECUTABLE_JAR" ]; then
+                echo "❌ Executable JAR not found"
+                exit 1
+            fi
+
+            # 임시로 포그라운드에서 실행해서 시작 로그 확인
+            echo "=== Testing application startup ==="
+            cd umc-hackathon-app
+            timeout 30s java -Dspring.profiles.active=prod \
+                            -Xms512m -Xmx1024m \
+                            -jar $(basename $EXECUTABLE_JAR) &
+            
+            TEMP_PID=$!
+            sleep 15
+            
+            # 임시 프로세스 종료
+            kill $TEMP_PID 2>/dev/null || true
+            sleep 2
+
+            # 실제 백그라운드 실행
+            echo "=== Starting Spring Boot Application ==="
+            nohup java -Dspring.profiles.active=prod \
+                       -Xms512m -Xmx1024m \
+                       -jar $(basename $EXECUTABLE_JAR) > startup.log 2>&1 &
+
+            # PID 저장
+            APP_PID=$!
+            echo $APP_PID > ../app.pid
+            echo "Application started with PID: $APP_PID"
+
+            # 애플리케이션 시작 대기
+            echo "=== Waiting for application startup ==="
+            sleep 25
+
+            # 프로세스 확인
+            if ps -p $APP_PID > /dev/null 2>&1; then
+                echo "✅ Application is running successfully"
+                echo "Process info:"
+                ps -o pid,cmd,%cpu,%mem -p $APP_PID
+            else
+                echo "❌ Application failed to start"
+                echo "=== Startup Log ==="
+                cat startup.log 2>/dev/null || echo "No startup log found"
+                echo "=== System Log ==="
+                dmesg | tail -10
+                echo "=== Java Processes ==="
+                ps aux | grep java || echo "No Java processes found"
+                exit 1
+            fi
+
+            # logback 설정에 따른 로그 파일 확인
+            echo "=== Application Logs Check ==="
+            cd ..
+            if [ -f logs/umc-hackathon.log ]; then
+                echo "Application log file exists"
+                echo "Recent logs from umc-hackathon.log:"
+                tail -15 logs/umc-hackathon.log
+            else
+                echo "Log file not yet created, checking startup log:"
+                tail -15 umc-hackathon-app/startup.log 2>/dev/null || echo "No logs available"
+            fi
+
+            echo "=== Deployment completed successfully ==="
 
           EOF
 
