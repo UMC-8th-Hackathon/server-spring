@@ -298,7 +298,7 @@ public class PerfumeController {
     @GetMapping("/recommend")
     @Operation(
         summary = "향수 추천",
-        description = "오디오 또는 이미지 타입에 따른 향수를 최대 10개 추천합니다. 인증 없이 사용 가능합니다."
+        description = "오디오 또는 이미지 타입에 따른 향수를 최대 10개 추천합니다."
     )
     @ApiResponses({
         @io.swagger.v3.oas.annotations.responses.ApiResponse(
