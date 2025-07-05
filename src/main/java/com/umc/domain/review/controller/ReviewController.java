@@ -5,7 +5,11 @@ import com.umc.common.response.ApiResponse;
 import com.umc.domain.review.dto.ReviewRequestDTO;
 import com.umc.domain.review.dto.ReviewResponseDTO;
 import com.umc.domain.review.service.ReviewService;
+import com.umc.global.exception.ErrorCode;
+import io.jsonwebtoken.ExpiredJwtException;
+import io.jsonwebtoken.JwtException;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -23,8 +27,21 @@ public class ReviewController {
             @RequestHeader("Authorization") String token,
             @RequestBody ReviewRequestDTO.CreatReviewRequestDTO request
     ) {
+
+        /*
+        // 1. 향수 존재 여부 확인 -> 향수 엔티티 추가시 다시
+        if (!perfumeRepository.existsById(perfumeId)) {
+            return ResponseEntity.status(ErrorCode.PERFUME_NOT_FOUND.getStatus()).build();
+        }*/
+
+        // 2. JWT 유효성 검사 및 사용자 ID 추출
         String parsedToken = token.replace("Bearer ", "");
-        Long userId = jwtTokenProvider.getUserId(parsedToken);
+        Long userId;
+        try {
+            userId = jwtTokenProvider.getUserId(parsedToken);
+        } catch (JwtException | IllegalArgumentException e) {
+            return ResponseEntity.status(ErrorCode.TOKEN_INVALID.getStatus()).build();
+        }
 
         ReviewResponseDTO.CreateReviewReponseDTO result = reviewService.createReview(perfumeId, userId, request);
 

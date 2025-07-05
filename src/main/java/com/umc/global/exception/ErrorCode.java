@@ -17,8 +17,14 @@ public enum ErrorCode {
     VALIDATION_ERROR(HttpStatus.BAD_REQUEST, "VALIDATION_001", "입력값 검증에 실패했습니다."),
     REQUIRED_FIELD_MISSING(HttpStatus.BAD_REQUEST, "VALIDATION_002", "필수 필드가 누락되었습니다."),
 
-    //
-    DUPLICATE_NICKNAME(HttpStatus.CONFLICT, "BUSINESS_002", "이미 존재하는 닉네임입니다. 비밀번호를 다시 ");
+    // 로그인 관련 에러
+    DUPLICATE_NICKNAME(HttpStatus.CONFLICT, "BUSINESS_002", "이미 존재하는 닉네임입니다. 비밀번호를 다시 입력해주세요."),
+
+    // 토큰 관련 에러
+    TOKEN_INVALID(HttpStatus.UNAUTHORIZED, "AUTH_001", "유효하지 않은 토큰입니다."),
+
+    // 향수 관련 에러
+    PERFUME_NOT_FOUND(HttpStatus.NOT_FOUND, "PERFUME_001", "해당 향수를 찾을 수 없습니다.");
 
     // TODO: 비즈니스 로직 개발하면서 필요한 에러코드들 추가
 
