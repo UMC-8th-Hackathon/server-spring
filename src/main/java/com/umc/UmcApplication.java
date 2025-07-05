@@ -10,4 +10,4 @@ public class UmcApplication {
         SpringApplication.run(UmcApplication.class, args);
     }
 
-} 
+}
