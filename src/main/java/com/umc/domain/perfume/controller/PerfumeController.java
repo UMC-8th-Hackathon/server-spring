@@ -1,20 +1,24 @@
 package com.umc.domain.perfume.controller;
 
+import com.umc.auth.util.JwtUtil;
 import com.umc.common.response.ApiResponse;
 import com.umc.domain.perfume.dto.PerfumeResponseDto;
 import com.umc.domain.perfume.entity.SourceType;
 import com.umc.domain.perfume.service.PerfumeService;
+import com.umc.domain.user.entity.User;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
+import jakarta.servlet.http.HttpServletRequest;
 
 @RestController
 @RequestMapping("/api/perfumes")
@@ -24,11 +28,13 @@ import org.springframework.web.multipart.MultipartFile;
 public class PerfumeController {
 
     private final PerfumeService perfumeService;
+    private final JwtUtil jwtUtil;
 
     @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     @Operation(
         summary = "향수 생성",
-        description = "오디오 또는 이미지 파일을 업로드하여 향수 정보를 생성합니다."
+        description = "오디오 또는 이미지 파일을 업로드하여 향수 정보를 생성합니다.",
+        security = @SecurityRequirement(name = "bearerAuth")
     )
     @ApiResponses({
         @io.swagger.v3.oas.annotations.responses.ApiResponse(
@@ -50,11 +56,23 @@ public class PerfumeController {
             @RequestParam("sourceType") SourceType sourceType,
             
             @Parameter(description = "업로드할 파일 (오디오 또는 이미지)")
-            @RequestParam("file") MultipartFile file) {
+            @RequestParam("file") MultipartFile file,
+            
+            HttpServletRequest request) {
+                
+        // Authorization 헤더 추출
+        String authorization = request.getHeader("Authorization");
+        log.info("향수 생성 요청 - sourceType: {}, fileName: {}, authorization: {}", 
+                sourceType, file.getOriginalFilename(), authorization);
         
-        log.info("향수 생성 요청 - sourceType: {}, fileName: {}", sourceType, file.getOriginalFilename());
+        if (authorization == null || authorization.trim().isEmpty()) {
+            throw new RuntimeException("Authorization 헤더가 없습니다. 헤더를 확인해주세요.");
+        }
         
-        PerfumeResponseDto response = perfumeService.createPerfume(sourceType, file);
+        // JWT 토큰에서 사용자 정보 추출
+        User user = jwtUtil.getUserFromHeader(authorization);
+        
+        PerfumeResponseDto response = perfumeService.createPerfume(sourceType, file, user);
         
         return ApiResponse.success(response);
     }

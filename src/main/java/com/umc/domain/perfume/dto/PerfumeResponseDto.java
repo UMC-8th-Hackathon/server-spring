@@ -60,8 +60,8 @@ public class PerfumeResponseDto {
                     .description(descriptionDto)
                     .url(perfume.getUrl())
                     .user(UserInfo.builder()
-                            .id(1L) // 임시 사용자 ID
-                            .nickname("user123") // 임시 닉네임
+                            .id(perfume.getUser().getId())
+                            .nickname(perfume.getUser().getNickname())
                             .build())
                     .createdAt(perfume.getCreatedAt().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")))
                     .updatedAt(perfume.getUpdatedAt().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")))
