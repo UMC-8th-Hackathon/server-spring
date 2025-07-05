@@ -61,6 +61,10 @@ dependencies {
 	runtimeOnly 'io.jsonwebtoken:jjwt-jackson:0.11.5'
 
 	implementation 'org.springframework.boot:spring-boot-starter-security'
+
+	// Jackson JSR310 모듈 (LocalDateTime 직렬화 지원)
+	implementation 'com.fasterxml.jackson.datatype:jackson-datatype-jsr310'
+	
 }
 
 tasks.named('test') {
