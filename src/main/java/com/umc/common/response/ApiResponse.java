@@ -1,6 +1,6 @@
 package com.umc.common.response;
 
-import com.divary.global.exception.ErrorCode;
+import com.umc.global.exception.ErrorCode;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.AllArgsConstructor;
 import lombok.Builder;

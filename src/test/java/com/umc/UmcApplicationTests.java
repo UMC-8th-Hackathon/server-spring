@@ -1,10 +1,10 @@
-package com.divary;
+package com.umc;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 
 @SpringBootTest
-class DivaryApplicationTests {
+class UmcApplicationTests {
 
     @Test
     void contextLoads() {
