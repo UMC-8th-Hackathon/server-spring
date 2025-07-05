@@ -37,6 +37,15 @@ public class AuthController {
     })
     @PostMapping("/login")
     public ResponseEntity<ApiResponse<TokenResponse>> login(@Valid @RequestBody LoginRequest request) {
+
+        if (request.nickname() == null || request.nickname().trim().isEmpty()) {
+            throw new BusinessException(ErrorCode.LOGIN_NICKNAME_EMPTY);
+        }
+
+        if (request.password() == null || request.password().trim().isEmpty()) {
+            throw new BusinessException(ErrorCode.LOGIN_PASSWORD_EMPTY);
+        }
+
         User user = userRepository.findByNickname(request.nickname())
                 .orElseGet(() -> {
                     // 없으면 자동 회원가입
