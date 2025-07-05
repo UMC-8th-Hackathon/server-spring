@@ -1,7 +1,7 @@
 package com.umc.domain.perfume.entity;
 
 import com.umc.common.entity.BaseEntity;
-import com.umc.domain.perfume.SourceType;
+
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
