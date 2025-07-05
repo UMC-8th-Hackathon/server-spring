@@ -6,10 +6,8 @@ import com.umc.domain.review.dto.ReviewRequestDTO;
 import com.umc.domain.review.dto.ReviewResponseDTO;
 import com.umc.domain.review.service.ReviewService;
 import com.umc.global.exception.ErrorCode;
-import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.JwtException;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -27,7 +25,7 @@ public class ReviewController {
     public ResponseEntity<ApiResponse<ReviewResponseDTO.CreateReviewReponseDTO>> createReview(
             @PathVariable Long perfumeId,
             @RequestHeader("Authorization") String token,
-            @RequestBody ReviewRequestDTO.CreatReviewRequestDTO request
+            @RequestBody ReviewRequestDTO.CreateReviewRequestDTO request
     ) {
 
         /*

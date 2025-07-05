@@ -6,8 +6,6 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
-import java.time.LocalDateTime;
-
 @Getter
 @NoArgsConstructor
 public class ReviewRequestDTO {
@@ -16,7 +14,7 @@ public class ReviewRequestDTO {
     @Getter
     @NoArgsConstructor
     @AllArgsConstructor
-    public static class CreatReviewRequestDTO {
+    public static class CreateReviewRequestDTO {
         private String description;
     }
 }
