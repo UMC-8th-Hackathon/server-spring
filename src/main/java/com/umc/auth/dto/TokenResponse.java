@@ -1,4 +1,6 @@
 package com.umc.auth.dto;
 
-public class TokenResponse {
-}
+// 응답 DTO
+public record TokenResponse( Long id,
+                             String nickname,
+                             String accessToken) {}
