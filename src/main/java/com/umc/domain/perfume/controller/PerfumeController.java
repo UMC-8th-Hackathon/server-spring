@@ -5,6 +5,7 @@ import com.umc.common.response.ApiResponse;
 import com.umc.domain.perfume.dto.PerfumeResponseDto;
 import com.umc.domain.perfume.entity.SourceType;
 import com.umc.domain.perfume.service.PerfumeService;
+import java.util.List;
 import com.umc.domain.user.entity.User;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -291,6 +292,54 @@ public class PerfumeController {
         } catch (Exception e) {
             log.error("향수 삭제 실패 - 시스템 오류: ", e);
             throw new RuntimeException("향수 삭제 중 예상하지 못한 오류가 발생했습니다.");
+        }
+    }
+
+    @GetMapping("/recommend")
+    @Operation(
+        summary = "향수 추천",
+        description = "오디오 또는 이미지 타입에 따른 향수를 최대 10개 추천합니다. 인증 없이 사용 가능합니다."
+    )
+    @ApiResponses({
+        @io.swagger.v3.oas.annotations.responses.ApiResponse(
+            responseCode = "200",
+            description = "향수 추천 성공",
+            content = @Content(schema = @Schema(implementation = PerfumeResponseDto.class))
+        ),
+        @io.swagger.v3.oas.annotations.responses.ApiResponse(
+            responseCode = "400",
+            description = "잘못된 요청 (잘못된 sourceType)"
+        )
+    })
+    public ApiResponse<List<PerfumeResponseDto>> recommendPerfume(
+            @Parameter(description = "소스 타입 (AUDIO 또는 IMAGE)", required = true)
+            @RequestParam("sourceType") String sourceType) {
+        
+        try {
+            log.info("향수 추천 요청 - sourceType: {}", sourceType);
+            
+            // sourceType을 내부 enum으로 변환
+            SourceType internalSourceType;
+            if ("AUDIO".equalsIgnoreCase(sourceType)) {
+                internalSourceType = SourceType.RECOMMEND_AUDIO;
+            } else if ("IMAGE".equalsIgnoreCase(sourceType)) {
+                internalSourceType = SourceType.RECOMMEND_IMAGE;
+            } else {
+                throw new RuntimeException("잘못된 sourceType입니다. AUDIO 또는 IMAGE만 사용 가능합니다.");
+            }
+            
+            List<PerfumeResponseDto> response = perfumeService.recommendPerfumes(internalSourceType);
+            
+            log.info("향수 추천 성공 - sourceType: {}, 추천 개수: {}", sourceType, response.size());
+            
+            return ApiResponse.success(response);
+            
+        } catch (RuntimeException e) {
+            log.error("향수 추천 실패 - sourceType: {}, 오류: {}", sourceType, e.getMessage());
+            throw e;
+        } catch (Exception e) {
+            log.error("향수 추천 실패 - 시스템 오류: ", e);
+            throw new RuntimeException("향수 추천 중 예상하지 못한 오류가 발생했습니다.");
         }
     }
 }
