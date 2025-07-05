@@ -9,6 +9,8 @@ import com.umc.domain.review.entity.Review;
 import com.umc.domain.review.repository.ReviewRepository;
 import com.umc.domain.user.entity.User;
 import com.umc.domain.user.repository.UserRepository;
+import com.umc.global.exception.BusinessException;
+import com.umc.global.exception.ErrorCode;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -27,7 +29,11 @@ public class ReviewService {
     @Transactional
     public ReviewResponseDTO.CreateReviewReponseDTO createReview(Long perfumeId, Long userId, ReviewRequestDTO.CreateReviewRequestDTO request) {
         User user = userRepository.findById(userId)
-                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 사용자입니다."));
+                .orElseThrow(() -> new BusinessException(ErrorCode.USER_NOT_FOUND));
+
+        if (request.getDescription() == null || request.getDescription().trim().isEmpty()) {
+            throw new BusinessException(ErrorCode.VALIDATION_ERROR, "리뷰 내용은 비어 있을 수 없습니다.");
+        }
 
         Review review = ReviewConverter.toEntity(perfumeId, userId, request);
         Review saved = reviewRepository.save(review);
