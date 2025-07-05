@@ -1,4 +1,4 @@
-package com.umc.user.domain;
+package com.umc.domain.user.entity;
 
 import com.umc.common.entity.BaseEntity;
 import jakarta.persistence.Column;
