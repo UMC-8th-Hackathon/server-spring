@@ -75,13 +75,13 @@ jobs:
           # EC2에서 압축 해제 후 실행
           ssh -i private_key.pem -o StrictHostKeyChecking=no $EC2_USERNAME@$EC2_HOST << EOF
             set -e
-            cd /home/ubuntu
+            cd /home/ec2-user
 
             rm -rf umc-hackathon-app
             mkdir -p umc-hackathon-app
             tar -xzf umc-hackathon-app.tar.gz -C umc-hackathon-app
 
-             # systemd 재시작
+            # systemd 재시작
             sudo systemctl daemon-reload
             sudo systemctl restart umc-hackathon
             sudo systemctl is-active umc-hackathon

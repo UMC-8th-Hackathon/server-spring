@@ -25,7 +25,7 @@ public class SystemController {
         Map<String, Object> healthInfo = new HashMap<>();
         healthInfo.put("status", "UP");
         healthInfo.put("timestamp", System.currentTimeMillis());
-        healthInfo.put("service", "divary-spring");
+        healthInfo.put("service", "umc-hackathon-spring");
         
         return ApiResponse.success("서비스가 정상적으로 동작 중입니다.", healthInfo);
     }
