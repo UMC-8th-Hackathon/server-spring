@@ -9,6 +9,7 @@ import java.util.List;
 import com.umc.domain.user.entity.User;
 import com.umc.global.config.SwaggerConfig.ApiErrorExample;
 import com.umc.global.config.SwaggerConfig.ApiErrorExamples;
+import com.umc.global.exception.BusinessException;
 import com.umc.global.exception.ErrorCode;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -246,7 +247,7 @@ public class PerfumeController {
         } else if ("IMAGE".equalsIgnoreCase(sourceType)) {
             internalSourceType = SourceType.RECOMMEND_IMAGE;
         } else {
-            throw new RuntimeException("잘못된 sourceType입니다. AUDIO 또는 IMAGE만 사용 가능합니다.");
+            throw new BusinessException(ErrorCode.PERFUME_INVALID_SOURCE_TYPE);
         }
 
         List<PerfumeResponseDto> response = perfumeService.recommendPerfumes(internalSourceType);
