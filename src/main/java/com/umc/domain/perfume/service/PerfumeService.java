@@ -33,24 +33,27 @@ public class PerfumeService {
      */
     public PerfumeResponseDto createPerfume(SourceType sourceType, MultipartFile file, User user) {
         try {
-            // 0. 사용자 존재 확인 (Foreign Key 제약 조건 해결)
+            // 0. sourceType 검증
+            validateSourceType(sourceType);
+            
+            // 1. 사용자 존재 확인 (Foreign Key 제약 조건 해결)
             User existingUser = userRepository.findById(user.getId())
                     .orElseThrow(() -> new BusinessException(ErrorCode.USER_NOT_FOUND));
             
-            // 1. 파일 유효성 검증
+            // 2. 파일 유효성 검증
             validateFile(file, sourceType);
             
-            // 2. GPT를 통한 향수 정보 생성 (임시 URL 사용)
+            // 3. GPT를 통한 향수 정보 생성 (임시 URL 사용)
             String tempUrl = "/temp/" + UUID.randomUUID().toString();
             Perfume perfume = perfumeGptService.generatePerfume(sourceType, tempUrl, file);
             
-            // 3. 검증된 사용자 정보 설정
+            // 4. 검증된 사용자 정보 설정
             perfume.setUser(existingUser);
             
-            // 4. 데이터베이스에 저장 (ID 생성을 위해)
+            // 5. 데이터베이스에 저장 (ID 생성을 위해)
             Perfume savedPerfume = perfumeRepository.save(perfume);
             
-            // 5. 파일을 구글 드라이브에 업로드하고 URL 업데이트
+            // 6. 파일을 구글 드라이브에 업로드하고 URL 업데이트
             try {
                 perfumeGptService.uploadFileAndUpdateUrl(savedPerfume, file);
                 log.info("파일 업로드 및 URL 업데이트 완료 - 향수 ID: {}", savedPerfume.getId());
@@ -59,13 +62,13 @@ public class PerfumeService {
                 // 파일 업로드 실패해도 향수는 생성됨 (임시 URL 유지)
             }
             
-            // 6. 업데이트된 URL로 데이터베이스 저장
+            // 7. 업데이트된 URL로 데이터베이스 저장
             savedPerfume = perfumeRepository.save(savedPerfume);
             
             log.info("향수 생성 완료 - ID: {}, 사용자: {}, 타입: {}", 
                     savedPerfume.getId(), existingUser.getNickname(), sourceType);
             
-            // 6. 응답 DTO 생성 및 반환 (sourceType을 클라이언트용으로 변환)
+            // 8. 응답 DTO 생성 및 반환 (sourceType을 클라이언트용으로 변환)
             PerfumeResponseDto dto = PerfumeResponseDto.from(savedPerfume);
             return dto.withClientSourceType(convertToClientSourceType(savedPerfume.getSourceType()));
             
@@ -114,7 +117,20 @@ public class PerfumeService {
                 contentType);
     }
 
-
+    /**
+     * sourceType 유효성 검증
+     */
+    private void validateSourceType(SourceType sourceType) {
+        if (sourceType == null) {
+            throw new BusinessException(ErrorCode.PERFUME_INVALID_SOURCE_TYPE);
+        }
+        
+        if (sourceType != SourceType.AUDIO && sourceType != SourceType.IMAGE) {
+            throw new BusinessException(ErrorCode.PERFUME_INVALID_SOURCE_TYPE);
+        }
+        
+        log.info("sourceType 검증 완료 - 타입: {}", sourceType);
+    }
 
     /**
      * 향수 조회
