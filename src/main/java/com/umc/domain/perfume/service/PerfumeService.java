@@ -6,6 +6,8 @@ import com.umc.domain.perfume.entity.SourceType;
 import com.umc.domain.perfume.repository.PerfumeRepository;
 import com.umc.domain.user.entity.User;
 import com.umc.domain.user.repository.UserRepository;
+import com.umc.global.exception.BusinessException;
+import com.umc.global.exception.ErrorCode;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -31,24 +33,27 @@ public class PerfumeService {
      */
     public PerfumeResponseDto createPerfume(SourceType sourceType, MultipartFile file, User user) {
         try {
-            // 0. 사용자 존재 확인 (Foreign Key 제약 조건 해결)
-            User existingUser = userRepository.findById(user.getId())
-                    .orElseThrow(() -> new RuntimeException("존재하지 않는 사용자입니다: " + user.getId()));
+            // 0. sourceType 검증
+            validateSourceType(sourceType);
             
-            // 1. 파일 유효성 검증
+            // 1. 사용자 존재 확인 (Foreign Key 제약 조건 해결)
+            User existingUser = userRepository.findById(user.getId())
+                    .orElseThrow(() -> new BusinessException(ErrorCode.USER_NOT_FOUND));
+            
+            // 2. 파일 유효성 검증
             validateFile(file, sourceType);
             
-            // 2. GPT를 통한 향수 정보 생성 (임시 URL 사용)
+            // 3. GPT를 통한 향수 정보 생성 (임시 URL 사용)
             String tempUrl = "/temp/" + UUID.randomUUID().toString();
             Perfume perfume = perfumeGptService.generatePerfume(sourceType, tempUrl, file);
             
-            // 3. 검증된 사용자 정보 설정
+            // 4. 검증된 사용자 정보 설정
             perfume.setUser(existingUser);
             
-            // 4. 데이터베이스에 저장 (ID 생성을 위해)
+            // 5. 데이터베이스에 저장 (ID 생성을 위해)
             Perfume savedPerfume = perfumeRepository.save(perfume);
             
-            // 5. 파일을 구글 드라이브에 업로드하고 URL 업데이트
+            // 6. 파일을 구글 드라이브에 업로드하고 URL 업데이트
             try {
                 perfumeGptService.uploadFileAndUpdateUrl(savedPerfume, file);
                 log.info("파일 업로드 및 URL 업데이트 완료 - 향수 ID: {}", savedPerfume.getId());
@@ -57,19 +62,21 @@ public class PerfumeService {
                 // 파일 업로드 실패해도 향수는 생성됨 (임시 URL 유지)
             }
             
-            // 6. 업데이트된 URL로 데이터베이스 저장
+            // 7. 업데이트된 URL로 데이터베이스 저장
             savedPerfume = perfumeRepository.save(savedPerfume);
             
             log.info("향수 생성 완료 - ID: {}, 사용자: {}, 타입: {}", 
                     savedPerfume.getId(), existingUser.getNickname(), sourceType);
             
-            // 6. 응답 DTO 생성 및 반환 (sourceType을 클라이언트용으로 변환)
+            // 8. 응답 DTO 생성 및 반환 (sourceType을 클라이언트용으로 변환)
             PerfumeResponseDto dto = PerfumeResponseDto.from(savedPerfume);
             return dto.withClientSourceType(convertToClientSourceType(savedPerfume.getSourceType()));
             
+        } catch (BusinessException e) {
+            throw e; // BusinessException은 그대로 전파
         } catch (Exception e) {
             log.error("향수 생성 중 오류 발생: ", e);
-            throw new RuntimeException("향수 생성에 실패했습니다: " + e.getMessage());
+            throw new BusinessException(ErrorCode.PERFUME_CREATION_FAILED);
         }
     }
 
@@ -79,28 +86,28 @@ public class PerfumeService {
     private void validateFile(MultipartFile file, SourceType sourceType) {
         // 파일 존재 검증
         if (file == null || file.isEmpty()) {
-            throw new RuntimeException("파일이 비어있습니다.");
+            throw new BusinessException(ErrorCode.PERFUME_FILE_EMPTY);
         }
 
         // 파일 크기 검증
         long maxSize = sourceType == SourceType.AUDIO ? 25 * 1024 * 1024 : 20 * 1024 * 1024; // 25MB for audio, 20MB for image
         if (file.getSize() > maxSize) {
-            throw new RuntimeException("파일 크기가 너무 큽니다. " + (maxSize / (1024 * 1024)) + "MB 이하로 업로드해주세요.");
+            throw new BusinessException(ErrorCode.PERFUME_FILE_SIZE_EXCEEDED);
         }
 
         // 파일 형식 검증
         String contentType = file.getContentType();
         if (contentType == null) {
-            throw new RuntimeException("파일 형식을 확인할 수 없습니다.");
+            throw new BusinessException(ErrorCode.PERFUME_INVALID_FILE_TYPE);
         }
 
         if (sourceType == SourceType.AUDIO) {
             if (!contentType.startsWith("audio/")) {
-                throw new RuntimeException("오디오 파일만 업로드 가능합니다. 현재 파일 형식: " + contentType);
+                throw new BusinessException(ErrorCode.PERFUME_INVALID_FILE_TYPE);
             }
         } else if (sourceType == SourceType.IMAGE) {
             if (!contentType.startsWith("image/")) {
-                throw new RuntimeException("이미지 파일만 업로드 가능합니다. 현재 파일 형식: " + contentType);
+                throw new BusinessException(ErrorCode.PERFUME_INVALID_FILE_TYPE);
             }
         }
 
@@ -110,7 +117,20 @@ public class PerfumeService {
                 contentType);
     }
 
-
+    /**
+     * sourceType 유효성 검증
+     */
+    private void validateSourceType(SourceType sourceType) {
+        if (sourceType == null) {
+            throw new BusinessException(ErrorCode.PERFUME_INVALID_SOURCE_TYPE);
+        }
+        
+        if (sourceType != SourceType.AUDIO && sourceType != SourceType.IMAGE) {
+            throw new BusinessException(ErrorCode.PERFUME_INVALID_SOURCE_TYPE);
+        }
+        
+        log.info("sourceType 검증 완료 - 타입: {}", sourceType);
+    }
 
     /**
      * 향수 조회
@@ -118,11 +138,11 @@ public class PerfumeService {
     @Transactional(readOnly = true)
     public PerfumeResponseDto getPerfume(Long id) {
         if (id == null || id <= 0) {
-            throw new RuntimeException("유효하지 않은 향수 ID입니다: " + id);
+            throw new BusinessException(ErrorCode.PERFUME_INVALID_INPUT_VALUE);
         }
         
         Perfume perfume = perfumeRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("향수를 찾을 수 없습니다: " + id));
+                .orElseThrow(() -> new BusinessException(ErrorCode.PERFUME_NOT_FOUND));
         
         log.info("향수 조회 완료 - ID: {}, 사용자: {}", id, perfume.getUser().getNickname());
         
@@ -137,11 +157,11 @@ public class PerfumeService {
     @Transactional(readOnly = true)
     public List<PerfumeResponseDto> getUserPerfumes(Long userId) {
         if (userId == null || userId <= 0) {
-            throw new RuntimeException("유효하지 않은 사용자 ID입니다: " + userId);
+            throw new BusinessException(ErrorCode.INVALID_INPUT_VALUE);
         }
         
         User user = userRepository.findById(userId)
-                .orElseThrow(() -> new RuntimeException("존재하지 않는 사용자입니다: " + userId));
+                .orElseThrow(() -> new BusinessException(ErrorCode.USER_NOT_FOUND));
         
         List<Perfume> perfumes = perfumeRepository.findByUserOrderByCreatedAtDesc(user);
         
@@ -161,15 +181,15 @@ public class PerfumeService {
      */
     public void deletePerfume(Long id, User user) {
         if (id == null || id <= 0) {
-            throw new RuntimeException("유효하지 않은 향수 ID입니다: " + id);
+            throw new BusinessException(ErrorCode.PERFUME_INVALID_INPUT_VALUE);
         }
         
         Perfume perfume = perfumeRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("향수를 찾을 수 없습니다: " + id));
+                .orElseThrow(() -> new BusinessException(ErrorCode.PERFUME_NOT_FOUND));
         
         // 본인이 생성한 향수인지 확인
         if (perfume.getUser() == null || !perfume.getUser().getId().equals(user.getId())) {
-            throw new RuntimeException("본인이 생성한 향수만 삭제할 수 있습니다.");
+            throw new BusinessException(ErrorCode.PERFUME_ACCESS_DENIED);
         }
         
         // 향수 삭제
@@ -183,11 +203,11 @@ public class PerfumeService {
     @Transactional(readOnly = true)
     public List<PerfumeResponseDto> recommendPerfumes(SourceType sourceType) {
         if (sourceType == null) {
-            throw new RuntimeException("sourceType이 필요합니다.");
+            throw new BusinessException(ErrorCode.PERFUME_INVALID_SOURCE_TYPE);
         }
         
         if (sourceType != SourceType.RECOMMEND_AUDIO && sourceType != SourceType.RECOMMEND_IMAGE) {
-            throw new RuntimeException("추천 API는 RECOMMEND_AUDIO 또는 RECOMMEND_IMAGE 타입만 사용 가능합니다.");
+            throw new BusinessException(ErrorCode.PERFUME_INVALID_SOURCE_TYPE);
         }
         
         // DB에서 추천 타입에 해당하는 향수들을 최대 10개 조회

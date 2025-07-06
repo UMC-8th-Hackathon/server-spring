@@ -32,8 +32,11 @@ public class ReviewService {
                 .orElseThrow(() -> new BusinessException(ErrorCode.USER_NOT_FOUND));
 
         if (request.getDescription() == null || request.getDescription().trim().isEmpty()) {
-            throw new BusinessException(ErrorCode.VALIDATION_ERROR, "리뷰 내용은 비어 있을 수 없습니다.");
+            throw new BusinessException(ErrorCode.REVIEW_DESCRIPTION_EMPTY);
         }
+
+        Perfume perfume = perfumeRepository.findById(perfumeId)
+                .orElseThrow(() -> new BusinessException(ErrorCode.PERFUME_NOT_FOUND));
 
         Review review = ReviewConverter.toEntity(perfumeId, userId, request);
         Review saved = reviewRepository.save(review);
@@ -43,24 +46,24 @@ public class ReviewService {
 
     @Transactional(readOnly = true)
     public List<ReviewResponseDTO.MyReviewDTO> getMyReviews(Long userId) {
+        // 사용자 검증
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new BusinessException(ErrorCode.USER_NOT_FOUND));
+
+        // 내가 작성한 리뷰 목록 조회
         List<Review> reviews = reviewRepository.findByUserId(userId);
 
         return reviews.stream()
-                .map(review -> {
-                    Perfume perfume = perfumeRepository.findById(review.getPerfumeId())
-                            .orElseThrow(() -> new IllegalArgumentException("해당 향수가 존재하지 않습니다."));
-
-                    ReviewResponseDTO.PerfumeDTO perfumeDTO = ReviewResponseDTO.PerfumeDTO.builder()
-                            .id(perfume.getId())
-                            .build();
-
-                    return ReviewConverter.toMyReviewDTO(review);
-                })
+                .map(ReviewConverter::toMyReviewDTO)  // Perfume 조회 제거
                 .collect(Collectors.toList());
     }
 
     @Transactional(readOnly = true)
     public List<ReviewResponseDTO.ReviewSimpleDTO> getReviewsByPerfumeId(Long perfumeId) {
+
+        perfumeRepository.findById(perfumeId)
+                .orElseThrow(() -> new BusinessException(ErrorCode.PERFUME_NOT_FOUND));
+
         List<Review> reviews = reviewRepository.findByPerfumeIdOrderByCreatedAtDesc(perfumeId);
 
         return reviews.stream().map(review -> {
