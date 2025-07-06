@@ -37,17 +37,15 @@ public class UserController {
     @Operation(summary = "자신의 닉네임 조회", description = "JWT 토큰을 기반으로 현재 유저의 닉네임을 조회합니다.",
             security = @SecurityRequirement(name = "bearerAuth"))
     @SwaggerConfig.ApiErrorExamples({
-            ErrorCode.TOKEN_INVALID
+            ErrorCode.TOKEN_MISSING,
+            ErrorCode.TOKEN_MALFORMED,
+            ErrorCode.TOKEN_INVALID,
+            ErrorCode.USER_NOT_FOUND
     })
     public ResponseEntity<ApiResponse<UserResponseDTO.MyNameDTO>> getMyNickname(HttpServletRequest request) {
-        String authorization = request.getHeader("Authorization");
-        log.info("닉네임 조회 요청 - Authorization: {}", authorization);
+        log.info("닉네임 조회 요청");
 
-        if (authorization == null || authorization.trim().isEmpty()) {
-            throw new BusinessException(ErrorCode.TOKEN_INVALID, "Authorization 헤더가 없습니다.");
-        }
-
-        User user = jwtUtil.getUserFromHeader(authorization);
+        User user = jwtUtil.getUserFromHeader(request.getHeader("Authorization"));
         UserResponseDTO.MyNameDTO response = UserConverter.toMyNameDTO(user);
 
         return ResponseEntity.ok(ApiResponse.success("닉네임 조회 성공", response));

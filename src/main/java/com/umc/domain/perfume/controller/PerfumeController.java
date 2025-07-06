@@ -54,6 +54,8 @@ public class PerfumeController {
         ErrorCode.PERFUME_FILE_SIZE_EXCEEDED,
         ErrorCode.PERFUME_INVALID_FILE_TYPE,
         ErrorCode.PERFUME_CREATION_FAILED,
+        ErrorCode.TOKEN_MISSING,
+        ErrorCode.TOKEN_MALFORMED,
         ErrorCode.TOKEN_INVALID,
         ErrorCode.USER_NOT_FOUND
     })
@@ -156,7 +158,12 @@ public class PerfumeController {
             content = @Content(schema = @Schema(implementation = PerfumeResponseDto.class))
         )
     })
-    @ApiErrorExample(ErrorCode.TOKEN_INVALID)
+    @ApiErrorExamples({
+        ErrorCode.TOKEN_MISSING,
+        ErrorCode.TOKEN_MALFORMED,
+        ErrorCode.TOKEN_INVALID,
+        ErrorCode.USER_NOT_FOUND
+    })
     public ApiResponse<List<PerfumeResponseDto>> getMyPerfumes(HttpServletRequest request) {
         
         // JWT 토큰에서 사용자 정보 추출
@@ -188,7 +195,10 @@ public class PerfumeController {
         ErrorCode.PERFUME_NOT_FOUND,
         ErrorCode.PERFUME_ACCESS_DENIED,
         ErrorCode.PERFUME_INVALID_INPUT_VALUE,
-        ErrorCode.TOKEN_INVALID
+        ErrorCode.TOKEN_MISSING,
+        ErrorCode.TOKEN_MALFORMED,
+        ErrorCode.TOKEN_INVALID,
+        ErrorCode.USER_NOT_FOUND
     })
     public ApiResponse<String> deletePerfume(
             @Parameter(description = "향수 ID", required = true)

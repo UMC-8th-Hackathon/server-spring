@@ -24,6 +24,8 @@ public enum ErrorCode {
 
     //토큰 관련 에러
     TOKEN_INVALID(HttpStatus.UNAUTHORIZED, "TOKEN_4001", "토큰이 유효하지 않습니다."),
+    TOKEN_MISSING(HttpStatus.UNAUTHORIZED, "TOKEN_4002", "Authorization 헤더가 필요합니다."),
+    TOKEN_MALFORMED(HttpStatus.UNAUTHORIZED, "TOKEN_4003", "토큰 형식이 올바르지 않습니다."),
 
     // 향수 관련 에러
     PERFUME_NOT_FOUND(HttpStatus.NOT_FOUND, "PERFUME_4001", "해당 향수를 찾을 수 없습니다."),
